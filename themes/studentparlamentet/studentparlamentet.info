@@ -1,0 +1,35 @@
+name = Studentparlamentet
+description = Theme for studentparlamentet
+version = VERSION
+core = 6.x
+engine = phptemplate
+stylesheets[all][] = css/reset.css
+stylesheets[all][] = css/core.css
+stylesheets[all][] = css/text.css
+stylesheets[all][] = css/960.css
+stylesheets[all][] = css/layout.css
+stylesheets[all][] = css/frontpage.css
+stylesheets[all][] = css/admin.css
+stylesheets[all][] = css/node.css
+stylesheets[all][] = css/moduleoverrides.css
+stylesheets[all][] = nivo-slider/nivo-slider.css
+
+scripts[] = nivo-slider/jquery.nivo.slider.pack.js
+scripts[] = javascript/util.js
+
+regions[top_fullwidth]    = Top Fullwidth
+regions[top_grid_1]       = Top Grid 1
+regions[top_grid_2]       = Top Grid 2
+regions[top_grid_3]       = Top Grid 3
+; regions[left]             = Left
+regions[content_top]      = Content Top
+regions[content_bottom]   = Content Bottom
+regions[right]            = Right
+regions[bottom_grid_1]    = Bottom Grid 1
+regions[bottom_grid_2]    = Bottom Grid 2
+regions[bottom_grid_3]    = Bottom Grid 3
+regions[bottom_fullwidth] = Bottom Fullwidth
+regions[navbar]           = Navigation Bar
+regions[header]           = Header
+regions[footer]           = Footer
+regions[closure_region]   = Closure

@@ -1,0 +1,1190 @@
+<?php 
+
+/**
+ * @file yr_verdata.module
+ * This file contains the code for getting the forecast from yr.no and displaying it on a Drupal site.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function yr_verdata_help($path, $arg) {
+  $output = '';
+  switch ($path) {
+    case 'admin/settings/yr_verdata' :
+      $output .= '<p>' . t('Here, you can configure the way weather forecast is shown to users on your site. To add locations, go to !addloc. To delete locations, go to !list.', array('!addloc' => l('forecast/add', 'forecast/add'), '!list' => l('forecast', 'forecast'))) . '</p>';
+      break;
+  }
+  return $output;
+}
+
+/**
+ * Implementation of hook_perm()
+ */
+function yr_verdata_perm() {
+  return array('administer yr_verdata');
+}
+
+/**
+ * Implementation of hook_menu()
+ */
+function yr_verdata_menu() {
+  $items = array();
+  $items['forecast'] = array(
+    'title'            => 'Forecast from yr.no',
+    'page callback'    => 'yr_verdata_page_all',
+    'access arguments' => array('access content'),
+    'type'             => MENU_NORMAL_ITEM,
+  );
+  $items['forecast/list'] = array(
+    'title'            => 'Overview',
+    'page callback'    => 'yr_verdata_page_all',
+    'access arguments' => array('access content'),
+    'type'             => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['forecast/%'] = array(
+    'title'            => 'Forecast',
+    'page callback'    => 'yr_verdata_page_single',
+    'page arguments'   => array(1),
+    'access arguments' => array('access content'),
+    'type'             => MENU_CALLBACK,
+  );
+  $items['forecast/add'] = array(
+    'title'            => 'Add location',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('yr_verdata_add_form'),
+    'access arguments' => array('administer yr_verdata'),
+    'type'             => MENU_LOCAL_TASK,
+    'weight'           => 1,
+    'file'             => 'yr_verdata.admin.inc',
+  );
+  $items['forecast/delete/%'] = array(
+    'title'            => 'Delete location',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('yr_verdata_delete_confirm', 2),
+    'access arguments' => array('administer yr_verdata'),
+    'type'             => MENU_CALLBACK,
+    'file'             => 'yr_verdata.admin.inc',
+  );
+  $items['admin/settings/yr_verdata'] = array(
+    'title'            => 'Yr weatherdata',
+    'description'      => 'Yr weatherdata can fetch forecast from yr.no and display it on your site.',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('yr_verdata_settings'),
+    'access arguments' => array('administer yr_verdata'),
+    'file'             => 'yr_verdata.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_cron().
+ */
+function yr_verdata_cron() {
+  variable_set('yr_verdata_62', 1);
+  // First we get all locations that are not updated within the maxage timeframe.
+  $maxage = variable_get('yr_verdata_maxage', 21600);
+  $result = db_query("SELECT * FROM {yr_verdata} WHERE (updated + %d) < %d ORDER BY updated ASC LIMIT 0, 10", array($maxage, time()));
+  // And then check the xml for each of them and update as necessary.
+  while ($record = db_fetch_object($result)) {
+    $load = yr_verdata_load_location($record->yid);
+    if ($load['status'] == TRUE) {
+      $location = $load['data'];
+      _yr_verdata_refresh_xml($location);
+    }
+  }
+}
+
+/**
+ * Implementation of hook_init().
+ */
+function yr_verdata_init() {
+  $modpath = drupal_get_path('module', 'yr_verdata');
+  drupal_add_css($modpath . '/yr_verdata.css');
+  if (module_exists('jquery_ui')) {
+    jquery_ui_add(array('ui.tabs'));
+    drupal_add_js($modpath . '/yr_verdata.js');
+    drupal_add_css($modpath . '/yr_verdata_jui.css');
+  }
+}
+
+/**
+ * Function for generating the main forecast page.
+ *
+ * @return
+ * Returns a themed list of locations with upcoming forecasts.
+ */
+function yr_verdata_page_all() {
+  if (!user_access('access content')) drupal_access_denied(); // Users without content access shouldn't access yr_verdata either. Can't use hook_access, because this is not a node module.
+  // First, we see if we have a cache. No need to ask the database,
+  // filesystem, PHP SimpleXML and yr.no for lots of locations if
+  // the cache is up to date.
+  if ($cache = cache_get('yr_verdata_page_all', 'cache') && $cache->expire > time()) {
+    $output = $cache->data;
+  }
+  else { // No valid cache, generate new.
+    $header = array(t('Location'), t('Forecast'));
+    $rows = array();
+    $empty = t('No locations are stored in the database.');
+    // Add some more stuff for admins.
+    if (user_access('administer yr_verdata')) {
+      $header[] = t('Delete location');
+      $empty .= ' ' . _yr_verdata_addmore_msg();
+    }
+    // Load locations.
+    $grouping = variable_get('yr_verdata_group', 'off'); // Are we grouping locations in some way?
+    $records = _yr_verdata_get_all();
+    $langs = _yr_verdata_langs();
+    $last_group = '';
+    if (count($records) > 0) {
+      foreach ($records as $record) { // Go over the array of locations and generate a row for use in theme_table().
+        // If we are grouping by something, add pretty "header" rows for each group.
+        if (($grouping != 'off')&&($record->$grouping != $last_group)) {
+          $colspan = (user_access('administer yr_verdata')) ? 3 : 2;
+          $thegroup = ($grouping == 'lang') ? $langs[$record->lang] : check_plain($record->$grouping);
+          $rows[$thegroup] = array('data' => array(array('data' => $thegroup, 'header' => TRUE, 'colspan' => $colspan)));
+          $last_group = $record->$grouping;
+        }
+        $name = yr_verdata_resolve_name($record); // Unclean, but cleaned by l().
+        $rows[$record->yid] = array(l($name, "forecast/$record->yid"), yr_verdata_generate($record, 'table')); // yid is a serial from the database, so it's safe.
+        if (user_access('administer yr_verdata')) $rows[$record->yid][] = l(t('Delete'), 'forecast/delete/' . $record->yid);
+      }
+      $output = theme('table', $header, $rows);
+      $npp = variable_get('yr_verdata_npp', 0);
+      if ($npp > 0) {
+        $output .= theme('pager', array(), $npp, 0, array(), 5);
+      }
+      $output .= yr_verdata_credit_link();
+    }
+    else {
+      $output = '';
+      drupal_set_message($empty, 'warning');
+    }
+    $maxage = variable_get('yr_verdata_maxage', 21600);
+    cache_set('yr_verdata_page_all', $output, 'cache', time() + $maxage);
+  }
+  return $output;
+}
+
+/**
+ * Function for generating a forecast page for a single location.
+ *
+ * @param $yid
+ * The unique ID for this location in our local database. This is provided in the URL.
+ * @return
+ * Returns the themed output of the forecast for the given location.
+ */
+function yr_verdata_page_single($yid) {
+  if (!user_access('access content')) drupal_access_denied(); // Users without content access shouldn't access yr_verdata either. Can't use hook_access, because this is not a node module.
+  // First, we see if we have a cache. No need to ask the database,
+  // filesystem/PHP SimpleXML and yr.no for lots of locations if
+  // the cache is up to date.
+  $yid = (int) $yid;
+  $cache_id = 'yr_verdata_page_single_' . $yid;
+  if ($yid == 0) {
+    drupal_set_message(t('No location found!'));
+    $output = '';
+  }
+  elseif ($cache = cache_get($cache_id, 'cache') && $cache->expire > time()) {
+    $output = $cache->data;
+  }
+  else { // No valid cache, generate new.
+    $load = yr_verdata_load_location($yid);
+    if ($load['status'] == TRUE) {
+      $output = '';
+      $location = $load['data'];
+      $location->information = yr_verdata_generate($location, 'information');
+      $location->forecast = yr_verdata_generate($location, 'forecast');
+      drupal_set_breadcrumb(array(l(t('Home'), '<front>'), l(t('Forecast'), 'forecast')));
+      $name = yr_verdata_resolve_name($location); // Unclean, but cleaned by t() in drupal_set_title().
+      drupal_set_title(t('Forecast for @location', array('@location' => $name)));
+      $items = array(l(t('Overview'), NULL, array('fragment' => 'yr-info', 'external' => TRUE)),
+                     l(t('Week-long forecast'), NULL, array('fragment' => 'yr-symbol', 'external' => TRUE)),
+      );
+      // If we are in mainland Norway, add a radarimage. Here is the link to it.
+      $url = drupal_substr($location->url, 17);
+      $comps = explode('/', $url);
+      if (in_array($comps[1], array('Norway', 'Norge', 'Noreg', 'Norga', 'Norja'))) {
+        $items[] = l(t('Radar'), NULL, array('fragment' => 'yr-radar', 'external' => TRUE));
+      }
+      // Start the output.
+      $output .= '<div id="yr-content">';
+      // Nav links, or tab links if jquery_ui is available.
+      $output .= theme('item_list', $items);
+      // The information about the location.
+      $output .= '<div id="yr-info" class="yr-page-tab">';
+      $output .= $location->information;
+      $output .= '</div>';
+      // The symbol forecast.
+      $output .= '<div id="yr-symbol" class="yr-page-tab">';
+      $output .= $location->forecast;
+      $output .= '</div>';
+      // If we are in mainland Norway, add a radarimage. Here is the image.
+      if (in_array($comps[1], array('Norway', 'Norge', 'Noreg', 'Norga', 'Norja'))) {
+        $output .= '<div id="yr-radar" class="yr-page-tab">';
+        $output .= yr_verdata_generate($location, 'radar');
+        $output .= '</div>';
+      }
+      // Credit link.
+      $output .= '<p class="yr-credit">';
+      $output .= yr_verdata_credit_link($location->url, FALSE, $location->xml->credit->link['text']);
+      $output .= '</p>';
+      // Close the #yr-content container div.
+      $output .= '</div>';
+      // Set the cache.
+      $maxage = variable_get('yr_verdata_maxage', 21600);
+      cache_set($cache_id, $output, 'cache', time() + $maxage);
+    }
+  }
+  return $output;
+}
+
+/**
+ * Implementation of hook_block().
+ */
+function yr_verdata_block($op = 'list', $delta = 0, $edit = array()) {
+  switch ($op) {
+    /**************
+     * Block info *
+     **************/
+    case 'list' :
+      // The default block.
+      $blocks[0]['info'] = t('Yr.no Weather Forecast');
+      // If multiple blocks are enabled, create a block for each location.
+      if (variable_get('yr_verdata_multiblocks', 'off') == 'on') {
+        $result = db_query("SELECT * FROM {yr_verdata} ORDER BY name ASC");
+        while ($record = db_fetch_object($result)) {
+          $load = yr_verdata_load_location($record->yid);
+          $location = $load['data'];
+          $name = yr_verdata_resolve_name($record);
+          $d = $record->yid + 1; // This is to allow a potential randomblock to have delta 1 while also having multiblocks enabled.
+          // Setting the randomblock to "last delta + 1" could give unexpected results if a new location is added afterwards.
+          if ($load['status'] == TRUE) $blocks[$d]['info'] = t('Yr weather forecast for @location', array('@location' => $name));
+        }
+      }
+      // If the random block option is enabled, show that one as well.
+      if (variable_get('yr_verdata_randomblock', 'off') == 'on') $blocks[1]['info'] = t('Yr random weather forecast');
+      // Return them.
+      return $blocks;
+
+    /**************
+     * Block view *
+     **************/
+    case 'view' :
+
+      if (!user_access('access content')) return array(); // Users without content access shouldn't access yr_verdata either.
+
+      // First the standard block.
+      if (empty($delta)) {
+        $block['subject'] = l(t('Forecast'), 'forecast');
+        // Check the cache.
+        $cache_id = 'yr_verdata_block_all';
+        if ($cache = cache_get($cache_id, 'cache') && $cache->expire > time()) {
+          $block['content'] = $cache->data;
+        }
+        else { // No cache found, or cache is old. Generate new.
+          $block['content'] = '';
+          // Load locations.
+          $records = _yr_verdata_get_all(TRUE);
+          if (count($records) == 0) return array(); // Ensures that no block is shown if there are no locations.
+          foreach ($records as $record) {
+            $load = yr_verdata_load_location($record->yid);
+            $location = $load['data'];
+            $name = yr_verdata_resolve_name($record); // Unclean, but cleaned by yr_verdata_generate_forecastboxes().
+            $block['content'] .= yr_verdata_generate($location, 'block', $name);
+          }
+          $block['content'] .= yr_verdata_credit_link(FALSE, TRUE);
+          // Set the cache for the block we just generated.
+          $maxage = variable_get('yr_verdata_maxage', 21600);
+          cache_set($cache_id, $output, 'cache', time() + $maxage);
+        }
+      }
+
+      // If the random block is enabled and placed in a region, we show it. This is not cached.
+      elseif (($delta == 1) && (variable_get('yr_verdata_randomblock', 'off') == 'on')) {
+        $load = yr_verdata_load_location(-1);
+        $location = $load['data'];
+        $name = yr_verdata_resolve_name($location); // Unclean, but cleaned by l().
+        $block['subject'] = l(t('Forecast for !location', array('!location' => $name)), 'forecast/' . $location->yid);
+        $block['content'] = yr_verdata_generate($location, 'block') . yr_verdata_credit_link($location->url, TRUE);
+      }
+
+      // Create a block for a given location.
+      else {
+        // Check for the multiblock setting here as well as in hook_block_info(),
+        // because otherwise if 'yr_multiblocks' is swithced off while multiblocks
+        // are assigned to regions, they won't show up on the administrative 'blocks'
+        // page, but still be visible in whatever region they were assigned to.
+        // The same goes for the randomblock above.
+        if (variable_get('yr_verdata_multiblocks', 'off') == 'on') {
+          // Get the yid from the delta.
+          $l = $delta - 1;
+          // Check the cache.
+          $cache_id = 'yr_verdata_block_' . $l;
+          if ($cache = cache_get($cache_id, 'cache') && $cache->expire > time()) {
+            $block['content'] = $cache->data;
+          }
+          else {
+            // Load the location.
+            $load = yr_verdata_load_location($l);
+            $location = $load['data'];
+            if ($load['status'] == TRUE) {
+              $name = yr_verdata_resolve_name($location); // Unclean, but cleaned by l().
+              $block['subject'] = l(t('Forecast for !location', array('!location' => $name)), 'forecast/' . $location->yid);
+              $block['content'] = yr_verdata_generate($location, 'block') . yr_verdata_credit_link($location->url, TRUE);
+              // Set the cache for the block we just generated.
+              $maxage = variable_get('yr_verdata_maxage', 21600);
+              cache_set($cache_id, $output, 'cache', time() + $maxage);
+            }
+            else {
+              return array();
+            }
+          }
+        }
+      }
+      return $block;
+  }
+}
+
+/**
+ * Function for generating a credit link back to yr.no.
+ *
+ * @param $url
+ * The url for the location. If not provided, the returned link will be to
+ * yr.no's frontpage.
+ * @param $short
+ * Whether or not the link text should be the full link text or a shorter, for
+ * use in blocks.
+ * @param $text
+ * Used for passing in text in other languages provided by yr.no.
+ * @return
+ * Returns a link back to yr.no with text that credits yr.no, output by l().
+ */
+function yr_verdata_credit_link($url = FALSE, $short = FALSE, $text = '') {
+  $link = ($url == FALSE) ? 'http://www.yr.no' : $url;
+  if ($text != '') {
+    $credit = l($text, $link);
+  }
+  else {
+    $longtext = t('Weather forecast from yr.no, delivered by the Norwegian Meteorological Institute and the NRK.');
+    $shorttext = t('Weather forecast from yr.no.');
+    $credit = ($short == FALSE) ? l($longtext, $link) : l($shorttext, $link);
+  }
+  return $credit;
+}
+
+/**
+ * Function for resolving the name of a location to use for display on pages and in blocks.
+ *
+ * @param $location
+ * The location object as loaded from the database.
+ * @return
+ * Returns the location name as set in the configuration form. One of 'name',
+ * 'name, region' or 'name, country'. This output is not safe, and should be
+ * cleaned up before being output to the user.
+ */
+function yr_verdata_resolve_name($location) {
+  $url = drupal_substr($location->url, 17);
+  $comps = explode('/', $url);
+  $nd = variable_get('yr_verdata_name_display', 4);
+  if ($nd == 4) {
+    return $location->name;
+  }
+  else {
+    $second_name = str_replace('_', ' ', trim($comps[$nd]));
+    $fb = variable_get('yr_verdata_name_fallback', 4);
+    $fallback = ($fb == 4) ? $location->name : $location->name . ', ' . str_replace('_', ' ', trim($comps[$fb]));
+    $name = ($second_name != $location->name) ? $location->name . ', ' . $second_name : $fallback;
+    return $name;
+  }
+}
+
+/**
+ * Function for generating a forecast for a location. This function should only
+ * be called after having checked if there is an up-to-date cache available, as
+ * this will load and parse an xml-file, possibly getting it from a remote host
+ * first, which is resource intensive.
+ *
+ * @param $location
+ * The location object as loaded from the database.
+ * @param $context
+ * The context this forecast will be used in. Can be one of 'table', 'block',
+ * 'information'.
+ * @param $name
+ * The name of the location, if this is supposed to be used for viewing a block
+ * with multiple locations in it. Defaults to emtpy.
+ * @return
+ * Returns marked-up forecast with text and symbols for display in the given context.
+ */
+function yr_verdata_generate(&$location, $context, $name = '') {
+  // First, check to see if the XML file is up to date. If not, get a new one.
+  _yr_verdata_refresh_xml($location);
+  // Load the xml for use later on.
+  $data = simplexml_load_file(_yr_verdata_local_file($location));
+  $location->xml = $data;
+  // Set up an array to send to the theme function.
+  $variables = array();
+  switch ($context) { // Based on what context, we pick parts of the xml and prepare it for display.
+    case 'table' :
+      $variables['symbol'] = theme('yr_verdata_symbol', array('symbol' => $data->forecast->tabular->time[0]->symbol, 'period' => $data->forecast->tabular->time[0]['period'])); // Clean.
+      $variables['wind'] = theme('yr_verdata_wind', array('dir' => $data->forecast->tabular->time[0]->windDirection, 'speed' => $data->forecast->tabular->time[0]->windSpeed)); // Clean.
+      $variables['temp'] = theme('yr_verdata_temp', $data->forecast->tabular->time[0]->temperature); // Clean.
+      $variables['time'] = date(_yr_verdata_date_format(), strtotime($data->forecast->tabular->time[0]['from'])); // Clean.
+      break;
+
+    case 'information' : // For the page, we first want a part with basic information and upcoming weather.
+      if ($location->lang == 'en') {
+        $trans_loctype = _yr_verdata_translatable();
+        // If the locationtype is not in the translatable array, we just call it "Place".
+        $loctype = (in_array((string) $data->location->type, $trans_loctype)) ? $trans_loctype[(string) $data->location->type] : t('Place');
+      }
+      else {
+        $loctype = check_plain($data->location->type);
+      }
+      $variables['location'] = t('!type in @country, @alt meters above sealevel', array('!type' => $loctype, '@country' => $data->location->country, '@alt' => $data->location->location['altitude'])); // Clean. $loctype is implicitly clean because it is a string from a translation.
+
+      $variables['lastupdate'] = t('Last updated @lastup', array('@lastup' => date(_yr_verdata_date_format(), strtotime($data->meta->lastupdate)))); // Clean.
+      if (isset($data->sun['never_rise'])) {
+        $variables['sun']['never_rise'] = t("Polar night, the sun doesn't rise.");
+      }
+      elseif (isset($data->sun['never_set'])) {
+        $variables['sun']['never_set'] = t("Midnight sun, the sun doesn’t set.");
+      }
+      else {
+        $variables['sun']['rise'] = t('Sunrise:') . ' ' . date(_yr_verdata_date_format(), strtotime($data->sun['rise'])); // Clean.
+        $variables['sun']['set'] = t('Sunset:') . ' ' . date(_yr_verdata_date_format(), strtotime($data->sun['set'])); // Clean.
+      }
+      // Link to yr.no.
+      $variables['links']['yr'] = l(t('Forecast for !location at yr.no', array('!location' => $location->name)), $location->url); // Cleaned by l().
+      $variables['links']['pdf'] = l(t('Printable PDF for !location (from yr.no)', array('!location' => $location->name)), $location->url . 'varsel.pdf'); // Cleaned by l().
+      // Link to google maps. TODO Make other map services available as a choice?
+      $gmaps_url = 'http://maps.google.com/maps?ie=UTF8&hl=en&z=12&ll=' . $data->location->location['latitude'] . ',' . $data->location->location['longitude'];
+      $variables['links']['gmaps'] = l(t('View !location at Google Maps', array('!location' => $location->name)), $gmaps_url); // Cleaned by l().
+      $variables['upcoming-forecast'] = yr_verdata_generate_forecastboxes($data);
+      $variables['timezone'] = $data->location->timezone['id']; // Cleaned by t() in the theme function.
+      break;
+
+    case 'forecast' :
+      // And add the four next forecast periods that are available.
+      $variables = yr_verdata_generate_forecastboxes($data, 4, 22);
+      break;
+
+    case 'radar' :
+      $variables = yr_verdata_radar($data);
+      break;
+
+    case 'block' :
+      $variables = yr_verdata_generate_forecastboxes($data, 0, 1, $name); // Just the first period for the block.
+      $variables['yid'] = $location->yid;
+      break;
+  }
+  return theme('yr_verdata_' . $context, $variables);
+}
+
+/**
+ * Function for generating one or more forecast boxes for given periods.
+ *
+ * @param $data
+ * The whole loaded xml.
+ * @param $start
+ * Which number in the array to start from. Defaults to 0, which is the first.
+ * @param $num
+ * The number of boxes we want presented, starting at the first time period available
+ * in the xml. Defaults to 4, as this normally represents a total of 24 hours.
+ * @param $name
+ * The name of the location, if this is supposed to be used for viewing a block
+ * with multiple locations in it. Defaults to emtpy.
+ * @return
+ * Returns an array of themed forecast boxes.
+ */
+function yr_verdata_generate_forecastboxes($data, $start = 0, $num = 4, $name = '') {
+  $key = 0;
+  $boxes = array();
+  $periods = $data->forecast->tabular->time;
+  $last = 0;
+  foreach ($periods as $forecast) {
+    if (($num - $key) == 1) $boxes[$key]['last'] = TRUE;
+    if ($key == $num) break; // Stop the loop once we hit the desired number of boxes.
+    if ($start > $key) { // This enables the ability to skip the first $start periods.
+      $key++;
+      continue;
+    }
+    $boxes[$key]['time'] = date(_yr_verdata_date_format(), strtotime($forecast['from'])); // Clean.
+    $boxes[$key]['symbol'] = theme('yr_verdata_symbol', array('symbol' => $forecast->symbol, 'period' => $forecast['period'])); // Clean.
+    $boxes[$key]['wind'] = theme('yr_verdata_wind', array('dir' => $forecast->windDirection, 'speed' => $forecast->windSpeed)); // Clean.
+    $boxes[$key]['temp'] = theme('yr_verdata_temp', $forecast->temperature); // Clean.
+    $boxes[$key]['precip'] = theme('yr_verdata_precip', $forecast->precipitation); // Clean.
+    $boxes[$key]['pressure'] = theme('yr_verdata_pressure', array('pressure' => $forecast->pressure)); // Clean.
+    $boxes[$key]['period'] = check_plain($forecast['period']); // This is used for adding markup in the long-term forecast.
+    if ($boxes[$key]['period'] == 0) $boxes[$key]['day'] = format_date(strtotime($forecast['to']), 'custom', 'l', NULL, NULL); // Add the dayname. We use $forecast['to'] to avoid any wrong daynames because of potential timezone issues.
+    if (($last == 3) && ($boxes[$key]['period'] == 2)) { // For the last days, which are just one box per day.
+      $boxes[$key]['day'] = t('Following days');
+      $boxes[$key]['following'] = TRUE;
+    }
+    $last = $boxes[$key]['period'];
+    $key++;
+  }
+  if (!empty($name)) $boxes['name'] = check_plain($name);
+  return $boxes;
+}
+
+/**
+ * Function for generating the necessary stuff for a radarimage.
+ *
+ * @param $data
+ * The loaded xml for this location.
+ * @return
+ * Returns an array with 'url' for the image url at api.yr.no, 'link' for
+ * the link to the radarpage at the location's page at yr.no and 'text'
+ * for the text used as alt and title for the image.
+ */
+function yr_verdata_radar($data) {
+    $lat = (int) $data->location->location['latitude'];
+    $long = (int) $data->location->location['longitude'];
+    $radarsite = FALSE;
+    // Figure out which radarimage to use. Start narrow in the south and expand if lat/long is outside range.
+    // Finally set $showradar = FALSE; if no compatible lat/long range is found.
+    if (($lat >= 57) && ($lat < 61) && ($long >= 4) && ($long < 7)) {
+      $radarsite = 'southwest_norway';
+      $radartext = t('Southwest-Norway');
+    }
+    elseif (($lat >= 57) && ($lat < 61) && ($long >= 7) && ($long <= 13)) {
+      $radarsite = 'southeast_norway';
+      $radartext = t('Southeast-Norway');
+    }
+    elseif (($lat >= 60) && ($lat < 62) && ($long >= 4) && ($long < 8)) {
+      $radarsite = 'western_norway';
+      $radartext = t('Western Norway');
+    }
+    elseif (($lat >= 62) && ($lat < 66) && ($long >= 4) && ($long <= 14)) {
+      $radarsite = 'central_norway';
+      $radartext = t('Central Norway');
+    }
+    elseif (($lat >= 57) && ($lat < 66) && ($long >= 4) && ($long <= 14)) {
+      $radarsite = 'south_norway';
+      $radartext = t('Southern Norway');
+    }
+    elseif (($lat >= 65) && ($lat < 69) && ($long > 10) && ($long <= 18)) {
+      $radarsite = 'nordland_troms';
+      $radartext = t('Northern Norway');
+    }
+    elseif (($lat >= 68) && ($lat < 72) && ($long > 17) && ($long <= 30)) {
+      $radarsite = 'troms_finnmark';
+      $radartext = t('Northernmost Norway');
+    }
+    else {
+      $radarsite = FALSE;
+    }
+    if ($radarsite == TRUE) {
+      $radar['url'] = 'http://api.yr.no/weatherapi/radar/1.2/?radarsite='. $radarsite .';width=460;type=animation';
+      $radar['link'] = (!empty($data->links->link[5]['url'])) ? check_url($data->links->link[5]['url']) : check_url($data->links->link[1]['url']);
+      $radar['text'] = t('Radarimage for !location', array('!location' => $radartext));
+    }
+    else {
+      $radar = FALSE;
+    }
+    return $radar;
+}
+
+/**
+ * Function for loading a location from the database, and adding the path to the file.
+ *
+ * @param $yid
+ * The location's yid in the {yr_verdata} table. If this is set to -1, a random location will be fetched.
+ * @return
+ * Returns an array with the basic location information in an object and a status.
+ * If no location was found, the status is FALSE, and the data returned is a message.
+ */
+function yr_verdata_load_location($yid) {
+  if ($yid == -1) {
+    $result = db_query("SELECT * FROM {yr_verdata} ORDER BY rand() LIMIT 1"); // This might be slow on large tables, but we'll probably never see anyone going over two digits on their drupal site. If so, they can post an issue, or simply not use the random block.
+  }
+  else {
+    $result = db_query("SELECT * FROM {yr_verdata} WHERE yid = %d", $yid);
+  }
+  if ($record = db_fetch_object($result)) {
+    $record->filepath = _yr_verdata_local_file($record);
+    return array('data' => $record, 'status' => TRUE);
+  }
+  else {
+    $msg = t('No location found with the given ID.');
+    if (user_access('administer yr_verdata')) $msg .= ' ' . _yr_verdata_addmore_msg();
+    return array('data' => $msg, 'status' => FALSE);
+  }
+}
+
+/**
+ * Function for generating the html tags for one box with forecast for a period.
+ *
+ * @param $item
+ * The period item with all required and pre-processed forecast data.
+ * @return
+ * Returns an array to be used in a render array for output.
+ */
+function yr_verdata_forecastbox($item) {
+  $output = '<div class="yr-forecast-box">';
+    $output .= '<p class="yr-period-time">' . $item['time'] . '</p>';
+    $output .= '<div class="yr-period-forecast">';
+      $output .= '<p class="yr-symbols">';
+        $output .= '<span class="yr-symbol">' . $item['symbol'] . '</span>';
+        $output .= '<span class="yr-wind">' . $item['wind'] . '</span>';
+        $output .= $item['temp'];
+      $output .= '</p>';
+      $output .= '<p class="yr-precip">' . $item['precip'] . '</p>';
+      $output .= '<p class="yr-pressure">' . $item['pressure'] . '</p>';
+    $output .= '</div>';
+  $output .= '</div>';
+  return $output;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function yr_verdata_theme($existing, $type, $theme, $path) {
+  return array(
+    'yr_verdata_symbol' => array(
+      'arguments' => array('vars' => NULL),
+    ),
+    'yr_verdata_wind' => array(
+      'arguments' => array('vars' => NULL),
+    ),
+    'yr_verdata_temp' => array(
+      'arguments' => array('vars' => NULL),
+    ),
+    'yr_verdata_precip' => array(
+      'arguments' => array('vars' => NULL),
+    ),
+    'yr_verdata_pressure' => array(
+      'arguments' => array('vars' => NULL),
+    ),
+    'yr_verdata_table' => array(
+      'arguments' => array('vars' => NULL),
+    ),
+    'yr_verdata_information' => array(
+      'arguments' => array('vars' => NULL),
+    ),
+    'yr_verdata_forecast' => array(
+      'arguments' => array('vars' => NULL),
+    ),
+    'yr_verdata_radar' => array(
+      'arguments' => array('vars' => NULL),
+    ),
+    'yr_verdata_block' => array(
+      'arguments' => array('vars' => NULL),
+    ),
+  );
+}
+
+/**
+ * Function for generating a themed weather symbol for one forecast period.
+ *
+ * @param $vars
+ * The symbol property from the loaded xml object. Should have
+ * the attributes 'number' and 'name'.
+ * @return
+ * Returns a themed image for the weather symbol.
+ */
+function theme_yr_verdata_symbol($vars) {
+  $nsym = FALSE;
+  switch ($vars['symbol']['number']) {
+    case '1':
+    case '2':
+    case '3':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+      $nsym = TRUE;
+      break;
+  }
+  $symbol = ($vars['symbol']['number'] > 9) ? $vars['symbol']['number'] : '0' . $vars['symbol']['number'];
+  $vars['period'] .= ''; // Convert the object to a string for the next comparison.
+  if ($nsym === TRUE) $symbol .= ($vars['period'] === '0') ? 'n' : 'd';
+  $url = variable_get('yr_verdata_symbol_url', 'http://symbol.yr.no/grafikk/sym/b38/') . $symbol . '.png';
+  return theme('image', $url, $vars['name'], $vars['name'], NULL, FALSE);
+}
+
+/**
+ * Function for generating a themed wind symbol for one forecast period.
+ *
+ * @param $vars
+ * Array with two keys:
+ * dir: The windDirection property from the loaded xml object. Should have
+ * the attributes 'deg', 'code' and 'name'.
+ * speed: The windSpeed property from the loaded xml object. Should have
+ * the attributes 'mps' and 'name'.
+ * @return
+ * Returns a themed image for the wind symbol.
+ */
+function theme_yr_verdata_wind($vars) {
+  // First, calculate different speed units.
+  $kph = bcmul($vars['speed']['mps'], 3.6, 1);
+  $mph = bcmul($vars['speed']['mps'], 2.24, 1);
+  $knots = bcmul($vars['speed']['mps'], 1.94, 1);
+  // Set up the return array.
+  $wind = array(
+    'speed' => array('m/s' => check_plain($vars['speed']['mps']), 'km/h' => $kph, 'mph' => $mph, 'knots' => $knots),
+    'speedname' => check_plain($vars['speed']['name']),
+    'deg' => check_plain($vars['dir']['deg']),
+    'code' => check_plain($vars['dir']['code']),
+    'dirname' => check_plain($vars['dir']['name']),
+  );
+  // Add the 'mps' notation for meters per second.
+  $wind['speed']['mps'] = $wind['speed']['m/s'];
+  
+  // And then generate an image for this wind value. The image will be generated by yr.no's servers,
+  // so we need to set up the parameters with the correct values.
+  // First, we round the degrees to the nearest 5, and make sure it's a 3-digit number.
+  $deg = $vars['dir']['deg'] - ($vars['dir']['deg'] % 5);
+  // Add leading zeroes as necessary.
+  if (drupal_strlen($deg) == 2) {
+    $deg = '0' . $deg;
+  }
+  elseif (drupal_strlen($deg) == 1) {
+    $deg = '00' . $deg;
+  }
+  // 360 degrees doesn't work in the url, but 000 does.
+  $deg = ($deg == 360) ? '000' : $deg;
+  // Then we set up the speed to supply in the URL. It's supplied to the nearest 2.5, but in the URL,
+  // it's multiplied by 10.
+  $speed = $vars['speed']['mps'] * 10;
+  $speed = round($speed / 25) * 25;
+  // Speed may also need leading zeroes, but as a 4-digit number.
+  if (drupal_strlen($speed) == 3) {
+    $speed = '0' . $speed;
+  }
+  elseif (drupal_strlen($speed) == 2) {
+    $speed = '00' . $speed;
+  }
+  elseif (drupal_strlen($speed) == 1) {
+    $speed = '000' . $speed;
+  }
+  // Create the <img>.
+  $unit = variable_get('yr_verdata_windspeed_unit', 'm/s');
+  $url = variable_get('yr_verdata_wind_url', 'http://fil.nrk.no/yr/grafikk/vindpiler/32/') . 'vindpil.' . $speed . '.' . $deg . '.png';
+  $windtext = $wind['dirname'] . ', ' . $wind['speedname'] . ', ' . $wind['speed'][$unit] . ' ' . $unit;
+  return theme('image', $url, $windtext, $windtext, NULL, FALSE);
+}
+
+/**
+ * Function for generating a themed temperature display.
+ *
+ * @param $vars
+ * Array with two keys:
+ * unit: The unit the temperature is supplied in from yr.no.
+ * value: The value of the temperature in the given unit.
+ * @return
+ * Returns a themed temperature.
+ */
+function theme_yr_verdata_temp($vars) {
+  $temp_unit = variable_get('yr_verdata_temp_unit', 'celsius');
+  $tu_shorts = _yr_verdata_tu_shorts();
+  $temp = _yr_verdata_temperature($vars);
+  $temperature = '<span class="yr-temp ' . $temp['class'] . '">' . $temp[$temp_unit] . '&deg;' . $tu_shorts[$temp_unit] . '</span>';
+  return $temperature;
+}
+
+/**
+ * Function for generating the precipitation value for one forecast period.
+ *
+ * @param $vars
+ * The precipitation property from the loaded xml object. Only needed attribute is 'value'.
+ * @return
+ * Returns a precipitation value in the unit specified in yr_verdata preferences.
+ */
+function theme_yr_verdata_precip($vars) {
+  $precipitation = array(
+    'mm' => $vars['value'],
+    'in' => bcdiv($vars['value'], 25.4, 2),
+  );
+  $unit = variable_get('yr_verdata_precip_unit', 'mm');
+  $output = t('@value @unit precipitation', array('@value' => $precipitation[$unit], '@unit' => $unit));
+  return $output;
+}
+
+/**
+ * Function for generating the pressure value for one forecast period.
+ *
+ * @param $vars
+ * The pressure property from the loaded xml object. Attributes are 'value' and 'unit'.
+ * @return
+ * Returns a pressure value in the unit specified in yr_verdata preferences.
+ */
+function theme_yr_verdata_pressure($vars) {
+  $torr = bcdiv($vars['pressure']['value'], 1.333, 3);
+  $pressure = array(
+    'hPa' => $vars['pressure']['value'],
+    'psi' => bcdiv($vars['pressure']['value'], 68.948, 2),
+    'torr' => $torr,
+    'inHg' => bcdiv($torr, 25.4, 2),
+    'bar' => bcdiv($vars['pressure']['value'], 1000, 4),
+  );
+  $unit = variable_get('yr_verdata_press_unit', 'hPa');
+  $output = t('Pressure: @value @unit', array('@value' => $pressure[$unit], '@unit' => $unit));
+  return $output;
+}
+
+/**
+ * Theme function for displaying forecast in a short, inline presentation,
+ * for example in a table cell.
+ *
+ * @param $vars
+ * An array with various forecast parameters prepared for output.
+ * @return
+ * Returns the forecast parameters in the correct order, ready for the screen.
+ */
+function theme_yr_verdata_table($vars) {
+  $output = '<p class="yr-period-time">' . $vars['time'] . '</p>';
+  $output .= '<p class="yr-period-forecast"><span class="yr-symbol">' . $vars['symbol'] . '</span>';
+  $output .= '<span class="yr-wind">' . $vars['wind'] . '</span>';
+  $output .= $vars['temp'] . '</p>';
+  return $output;
+}
+
+/**
+ * Theme function for displaying the location information about a location on
+ * that location's main forecast page.
+ * Caching is done for the whole page, so we don't need to do it here.
+ *
+ * @param $vars
+ * An array for the location with basic information about it.
+ * @return
+ * Returns themed output with basic information for this location.
+ */
+function theme_yr_verdata_information($vars) {
+  $output = '';
+  foreach ($vars as $key => $value) {
+    $elem = 'p';
+    $class = 'yr-text';
+    if ($key === 'timezone') {
+      continue;
+    }
+    elseif ($key === 'links') {
+      $output .= theme('item_list', $value);
+    }
+    elseif ($key === 'upcoming-forecast') {
+      $output .= '<div id="yr-upcoming-forecast" class="yr-forecast-boxes clear-block">';
+      foreach ($value as $item) {
+        $output .= yr_verdata_forecastbox($item);
+      }
+      $output .= '</div>';
+    }
+    else {
+      if (($key === 'sun') && isset($value['never_rise'])) {
+        $class .= ' yr-polarnight';
+        $value = $value['never_rise'];
+      }
+      elseif (($key === 'sun') && isset($value['never_set'])) {
+        $class .= ' yr-midnightsun';
+        $value = $value['never_set'];
+      }
+      elseif ($key === 'sun') {
+        $class .= ' yr-sun';
+        $value = $value['rise'] . '<br />' . $value['set'];
+      }
+      $output .= "<$elem class=\"$class\">$value</$elem>";
+    }
+  }
+  // Add a note about time.
+  $output .= '<p class="yr-timezone-note">' . t('All times are in local time, %timezone.', array('%timezone' => $vars['timezone'])) . '</p>';
+  return $output;
+}
+
+/**
+ * Theme function for displaying the forecast for a location on
+ * that location's main forecast page.
+ * Caching is done for the whole page, so we don't need to do it here.
+ *
+ * @param $vars
+ * An array with the processed forecast information for this location, each element
+ * in the array should be one tabular period from the xml.
+ * @return
+ * Returns themed output with forecast in boxes for this location.
+ */
+function theme_yr_verdata_forecast($vars) {
+  $output = '<div id="yr-longterm-forecast" class="yr-forecast-boxes clear-block">';
+  if ($vars[4]['period'] != '0') {
+    // The first day should have a heading that says "Tomorrow".
+    $output .= '<h4>' . t('Tomorrow') . '</h4>';
+    $period_class = 'yr-period-margin-' . $vars[4]['period'];
+    $output .=  '<div class="yr-longterm-day ' . $period_class . ' clear-block">';
+  }
+  foreach ($vars as $item) {
+    // Create a "new line" for each day of the forecast. Also, add a header saying which day this is.
+    if (($item['period'] == '0') || isset($item['following'])) {
+      $output .= '<h4>' . ucfirst($item['day']) . '</h4>'; // ucfirst() because these are headers.
+      $output .= '<div class="yr-longterm-day clear-block">';
+    }
+    $output .= yr_verdata_forecastbox($item);
+    // Close the "day-line".
+    if (($item['period'] == '3') || isset($item['last'])) $output .= '</div><!-- /.yr-longterm-day -->';
+  }
+  $output .= '</div><!-- /#yr-longterm-forecast -->';
+  return $output;
+}
+
+/**
+ * Theme function for displaying the radarimage for a location on
+ * that location's main forecast page.
+ * Caching is done for the whole page, so we don't need to do it here.
+ *
+ * @param $vars
+ * An array with the processed radar information for this location.
+ * @return
+ * Returns themed output with a radarimage for this location, linking to the
+ * radarimage page at yr.no.
+ *
+ * @see http://api.yr.no/weatherapi/radar/1.2/documentation
+ */
+function theme_yr_verdata_radar($vars) {
+  $image = theme('image', $vars['url'], $vars['text'], $vars['text'], NULL, FALSE);
+  $output = '<h3>' . $vars['text'] . '</h3>';
+  $output .= l($image, $vars['link'], array('html' => TRUE));
+  return $output;
+}
+
+/**
+ * Theme function for the block display.
+ *
+ * @param $vars
+ * An array with the processed forecast information for the first period of this location.
+ * @return
+ * Returns a themed output for a block.
+ */
+function theme_yr_verdata_block($vars) {
+  $output = '';
+  if (isset($vars['name'])) $output .= '<h4>' . l($vars['name'], 'forecast/' . $vars['yid']) . '</h4>';
+  $output .= '<div class="yr-forecast-block-box">';
+    $output .= '<p class="yr-period-time">' . $vars[0]['time'] . '</p>';
+    $output .= '<div class="yr-period-forecast">';
+      $output .= '<p class="yr-symbols">';
+        $output .= '<span class="yr-symbol">' . $vars[0]['symbol'] . '</span>';
+        $output .= '<span class="yr-wind">' . $vars[0]['wind'] . '</span>';
+        $output .= $vars[0]['temp'];
+      $output .= '</p>';
+      $output .= '<p class="yr-precip">' . $vars[0]['precip'] . '</p>';
+      $output .= '<p class="yr-pressure">' . $vars[0]['pressure'] . '</p>';
+    $output .= '</div>';
+  $output .= '</div>';
+  return $output;
+}
+
+/**********************
+ * Private functions. *
+ **********************/
+
+/**
+ * Message functions for centralizing messages used multiple places.
+ */
+function _yr_verdata_addmore_msg() {
+  return t('You can add more locations at !add_loc', array('!add_loc' => l('forecast/add', 'forecast/add')));
+}
+
+/**
+ * Function for making some of the strings contained in the xml feed translatable to any language.
+ */
+function _yr_verdata_translatable() {
+  return array(
+    'Seat of government' => t('Seat of government'),
+    'Region' => t('Region'),
+    'Regional capital' => t('Regional capital'),
+    'Capital' => t('Capital'),
+    'City' => t('City'),
+    'City - large town' => t('City - large town'),
+    'City - small town' => t('City - small town'),
+    'Small town' => t('Small town'),
+    'Municipality' => t('Municipality'),
+    'Populated place' => t('Populated place'),
+    'Section of populated place' => t('Section of populated place'),
+    'Village' => t('Village'),
+    'Village area' => t('Village area'),
+    'Beach' => t('Beach'),
+    'Lake' => t('Lake'),
+    'Mountain' => t('Mountain'),
+    'Airport' => t('Airport'),
+    'Railway station' => t('Railway station'),
+    'Light house' => t('Light house'),
+    'Power station' => t('Power station'),
+    'Quay' => t('Quay'),
+    'Church' => t('Church'),
+    'Hut' => t('Hut'),
+    'Housing estate' => t('Housing estate'),
+  );
+}
+
+/**
+ * Function for getting all locations into an array of objects.
+ * Used for the block and overview page for all locations. Will
+ * sort and group the returned array according to the settings
+ * in yr_verdata's configuration page.
+ *
+ * @param $block
+ * If this is TRUE, no paging is performed in the query, because for the block
+ * with all locations, we are loading all of them.
+ * @return
+ * Returns an array of locations as objects from the database.
+ * Sorted and grouped as per the settings.
+ */
+function _yr_verdata_get_all($block = FALSE) {
+  $grouping = variable_get('yr_verdata_group', 'off'); // Are we grouping locations in some way?
+  $order = variable_get('yr_verdata_order', 'weight');
+  $placeholders = array();
+  $records = array();
+  $query = "SELECT * FROM {yr_verdata} ORDER BY";
+  if ($grouping != 'off') {
+    $query .= " '%s',";
+    $placeholders[] = $grouping;
+  }
+  $query .= " '%s'";
+  $placeholders[] = $order;
+  if ($order != 'weight') $query .= ", 'weight'"; // If we are not using weight as primary ordering, we still order by that in the end.
+  $npp = variable_get('yr_verdata_npp', 0);
+  // If we are loading for a block, we shouldn't page the results.
+  if ($block == TRUE) $npp = 0;
+  if ($npp > 0) {
+    $result = pager_query($query, $npp, 0, NULL, $placeholders);
+  }
+  else {
+    $result = db_query($query, $placeholders);
+  }
+  while ($record = db_fetch_object($result)) {
+    $records[] = $record;
+  }
+  return $records;
+}
+
+/**
+ * Function for updating an xml file from yr.no on cron run.
+ *
+ * @param $location
+ * A location object from the {yr_verdata} table.
+ */
+function _yr_verdata_refresh_xml($location) {
+  // Initiate our local file.
+  $destination = _yr_verdata_local_file($location);
+  // Set the nextupdate timestamp to 0, in case this is the first time
+  // we are getting the forecast for this location. Otherwise, see if the
+  // "nextupdate" property of our existing file has passed.
+  $nextupdate = 0;
+  if (file_exists($destination)) {
+    $xml = simplexml_load_file($destination);
+    $nextupdate = strtotime($xml->meta->nextupdate);
+  }
+  // We don't connect to yr for the file unless it has been at least 12 minutes since the last time we did.
+  $cooldown = (!empty($location->updated)) ? (time() - $location->updated) : 721; // To avoid a PHP notice.
+  if (($nextupdate <= time()) && ($cooldown > 720)) { // If this is TRUE...
+    // ...yr.no have updated their data, so we can get an updated xml feed from yr.no.
+    $data = _yr_verdata_fetch_xml($location);
+    if ($data != FALSE) { // If the data was valid, save it. Otherwise, it will be re-checked on next cron run.
+      file_save_data($data, $destination, FILE_EXISTS_REPLACE);
+    }
+  }
+  // Update the database entry with the request time in the 'updated' field.
+  db_query("UPDATE {yr_verdata} SET updated = %d WHERE yid = %d", time(), $location->yid);
+}
+
+/**
+ * Function for getting an xml file from yr.no.
+ *
+ * @param $location
+ * A location object from the {yr_verdata} table.
+ */
+function _yr_verdata_fetch_xml($location) {
+  $feed = check_url('http://www.yr.no/' . drupal_urlencode(drupal_substr($location->url, 17)) . 'varsel.xml');
+  // Initialize new cURL session.
+  $ch = curl_init();
+  // Test the connection and see if the returned data is actually a valid forecast.
+  curl_setopt($ch, CURLOPT_URL, $feed);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+  curl_setopt($ch, CURLOPT_HEADER, 0);
+  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+  curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+  $data = curl_exec($ch);
+  $info = curl_getinfo($ch);
+  $valid_xml = simplexml_load_string($data);
+  if ($info['http_code'] == '200' && (isset($valid_xml->location->name))) {
+    // The forecast seems ok, we can return it.
+    return $data;
+  }
+  else {
+    watchdog('yr_verdata', 'Yr.no did not return 200 OK, and/or the XML for @location was invalid. URL was !url', array('@location' => $location->name, '!url' => $feed), WATCHDOG_ERROR);
+    return FALSE;
+  }
+}
+
+/**
+ * Function for resolving directory location and initiating a local file for storing the xml.
+ *
+ * @param $location
+ * @return
+ * Returns the file destination for loading and saving data.
+ */
+function _yr_verdata_local_file($location) {
+  // Check that the directory exists.
+  $yr_dir = file_directory_path() . '/yr_verdata';
+  file_check_directory($yr_dir, FILE_CREATE_DIRECTORY);
+  $destination = $yr_dir . '/' . $location->file;
+  return $destination;
+}
+
+/**
+ * Function for returning the date format variable set in yr_verdata settings.
+ */
+function _yr_verdata_date_format() {
+  return variable_get('date_format_short', 'm/d/Y - H:i');
+}
+
+/**
+ * Function for resolving the temperature.
+ *
+ * @param $temp
+ * The temperature property of a tab object from the xml.
+ * Must be an array with 'unit' and 'value'.
+ * Currently, only the unit 'celsius' is provided from yr.no.
+ * @return
+ * Returns an array with output-safe temperatures in celsius, Fahrenheit and Kelvin.
+ */
+function _yr_verdata_temperature($temp) {
+  $temperature = array();
+  switch ($temp['unit']) {
+    case 'celsius' :
+      $temperature['celsius'] = (int)$temp['value'];
+      $temperature['fahrenheit'] = round(($temp['value'] * 9 / 5) + 32);
+      $temperature['kelvin'] = $temp['value'] + 273;
+      break;
+  }
+  $temperature['class'] = ($temperature['celsius'] > 0) ? 'warm' : 'cold';
+  return $temperature;
+}
+
+/**
+ * Helper function for generating short notations for temperature units.
+ */
+function _yr_verdata_tu_shorts() {
+  return array('celsius' => 'C', 'fahrenheit' => 'F', 'kelvin' => 'K');
+}
+
+/**
+ * Helper function for generating an array of the available languages for forecasts.
+ */
+function _yr_verdata_langs() {
+  return array(
+    'en' => t('English'),
+    'nb' => t('Norwegian bokmål'),
+    'nn' => t('Norwegian nynorsk'),
+    'no-kv' => t('Kvääni'),
+    'smi' => t('Davvisámegiella'),
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+

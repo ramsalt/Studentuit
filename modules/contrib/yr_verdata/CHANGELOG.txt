@@ -1,0 +1,79 @@
+Yr Weatherdata 6.x-2.2 2011-04-11
+---------------------------------
+Issue #1117378 by tjodolv: Updated module for changes in yr.no's XML feed.
+Added a limit of 10 to the amount of locations that can be updated in one cron run.
+Issue #1032158 by tjodolv: Fixed the dayname for day headers in the week forecast.
+Added a note that says that all times are in local time.
+
+Yr Weatherdata 6.x-2.x-dev, 2011-02-24
+--------------------------------------
+#1032158 by tjodolv: Fixed the dayname for day headers in the week forecast.
+Added a note that says that all times are in local time.
+Fixed an issue where mainland locations in Norway would sometimes lose the radarimage.
+
+Yr Weatherdata 6.x-2.x-dev, 2011-02-22
+--------------------------------------
+Added note about upgrading in the readme.
+
+Yr Weatherdata 6.x-2.x-dev, 2011-02-21
+--------------------------------------
+Fixed an issue where setting a pager would cause the block to only load the first X locations.
+#1032158 by tjodolv: Week forecast now has better textual and visual separation of days.
+Added a variable to allow upgrading directly from either 6.x-1.x or 6.x-2.x branch to 7.x-1.x branch.
+
+Yr Weatherdata 6.x-2.x-dev, 2011-02-19
+--------------------------------------
+#1064934 by tjodolv: No longer depending on Drupal's format_date(). Removed _yr_verdata_unix_time().
+Removed the date/time settings in the config page. Now just using the site "short" format.
+Removed unnecessary $(document).ready() in yr_verdata.js.
+
+Yr Weatherdata 6.x-2.x-dev, 2011-02-19
+--------------------------------------
+#1064934 by tjodolv: No longer depending on Drupal's format_date(). Removed _yr_verdata_unix_time().
+Removed the date/time settings in the config page. Now just using the site "short" format.
+
+Yr Weatherdata 6.x-2.x-dev, 2011-02-11
+--------------------------------------
+Fixed the link to the config page from the 'add location' page.
+Upgrade from 6.x-1.x working.
+Fixed validation of added locations, where some locations could be added several times.
+Added styles for jquery ui tabs.
+
+Yr Weatherdata 6.x-2.x-dev, 2011-02-10
+--------------------------------------
+Temperature, wind and symbol theme functions working.
+Blocks now working.
+Caching working for overview and single location pages, and block content. No caching for the randomblock, by design.
+
+Yr Weatherdata 6.x-2.x-dev, 2011-02-09
+--------------------------------------
+Started working on the theme layer. Currently wsoding and not working.
+Fixed some hickups with the backport of the functionality for deleting locations.
+
+Yr Weatherdata 6.x-2.x-dev, 2011-02-08
+--------------------------------------
+Ported some more helper functions, including the fetching xml and forecast helpers.
+Removed unnessecary checking of the url when loaded from the database. URLs are validated as yr.no urls before saving.
+Added administrative file. Not working yet.
+Added theme functions. Not working yet.
+Fixed some fatal php errors in the install file.
+
+Yr Weatherdata 6.x-2.x-dev, 2011-02-07
+--------------------------------------
+Implemented hook_init() for css files.
+Added update function for 6.x-1.x to 6.x-2.x. Not tested yet.
+
+Yr Weatherdata 6.x-2.x-dev, 2011-01-23
+--------------------------------------
+Page and block functions ported, but no theme layer yet. No block caching. Only a few helper functions ported.
+More cleaning up. Started porting the 7.x-1.0 release to 6.x-2.x.
+
+Yr Weatherdata 6.x-2.x-dev, 2011-01-21
+--------------------------------------
+by tjodolv: Getting back to the 6.x-2.x branch. Some cleaning up.
+
+Yr Weatherdata 6.x-2.x-dev, 2010-09-04
+--------------------------------------
+by tjodolv: Backport of the 7.x-1.x branch to 6.x-2.x.
+Removed a bunch of old 6.x-1.x files and added the 7.x-1.x versions.
+Adapted the new files for the 6.x API.

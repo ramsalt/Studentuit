@@ -1,0 +1,94 @@
+/** NODE TAB STYLES **/
+
+ul.tabs {
+  border: none;
+  padding: 10px;
+  margin: 0 0 20px 0;
+  border-bottom: solid 1px #ccc;
+  background: -moz-linear-gradient(top, #f3f1e9 0%, #e4e2d8 100%);
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f3f1e9), to(#e4e2d8));
+}
+
+ul.tabs li {
+  margin:0;
+}
+
+ul.tabs li a,
+ul.tabs li a.active {
+  border:none;
+}
+
+ul.tabs li a {
+  background: #eee;
+  background: -moz-linear-gradient(top, #eee 0%, #ccc 100%);
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#eee), to(#ccc));
+  border: 1px solid #ccc;
+  border-bottom: 1px solid #bbb;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  color: #333;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 1;
+  padding: 5px 10px;
+  text-align: center;
+  text-shadow: 0 1px 0 #eee;
+  width: 150px;
+}
+
+ul.tabs li a.active,
+ul.tabs li a:hover {
+  background: #ddd;
+  background: -moz-linear-gradient(top, #aaa 0%, #ccc 100%);
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#aaa), to(#ccc));
+  border: 1px solid #bbb;
+  border-bottom: 1px solid #999;
+  cursor: pointer;
+  text-shadow: 0 1px 0 #ddd;
+}
+
+/** NODE STYLES **/
+
+.node, {
+  padding:0 30px;
+}
+
+/** NODE ELEMENT STYLES **/
+/*
+
+h1 {
+  font-size:2.5em;
+}
+
+p {
+  margin:10px 0;
+}
+
+*/ 
+
+/** META STYLES **/
+.meta ul {
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+
+.meta ul li {
+  display: inline;
+  margin:0;
+  padding:0 10px 0 5px;
+  border-right: solid 1px #ccc;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size:.85em;
+  color:#999;
+}
+
+.meta ul li:first-child {
+  padding-left: 0;
+}
+
+.meta ul li:last-child {
+  border: none;
+}

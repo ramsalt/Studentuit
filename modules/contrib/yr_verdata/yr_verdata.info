@@ -1,0 +1,10 @@
+name = Yr Weatherdata
+description = Collects weather forecast data from http://yr.no and displays it at the site, both in a block and as a page.
+php = 5
+core = 6.x
+; Information added by drupal.org packaging script on 2011-04-11
+version = "6.x-2.2"
+core = "6.x"
+project = "yr_verdata"
+datestamp = "1302555719"
+

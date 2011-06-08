@@ -1,0 +1,61 @@
+
+
+#frontpage .box.slideshow {
+  height: 300px;
+}
+
+#frontpage .box.nextmatch,
+#frontpage .box.mainsponsor {
+  height: 140px;
+}
+
+#frontpage .box.membership {
+  height: 80px;
+}
+
+#frontpage .box.latestnews,
+#frontpage .box.events,
+#frontpage .box.teams {
+  height: 300px;
+}
+
+#frontpage .box.nextmatch .box-content {
+  border:solid 4px #fff;
+  height: 116px;
+}
+
+#fpslider {
+  overflow: hidden;
+}
+
+#fpslider {
+    position:relative;
+    width:600px; /* Change this to your images width */
+    height:280px; /* Change this to your images height */
+    background:url(../nivo-slider/demo/images/loading.gif) no-repeat 50% 50%;
+}
+#fpslider img {
+    position:absolute;
+    top:0px;
+    left:0px;
+    display:none;
+}
+#fpslider a {
+    border:0;
+    display:block;
+}
+
+.nivo-directionNav a {
+  position:absolute;
+  width:13px;
+  height:57px;
+  text-indent: -2000px;
+}
+
+.nivo-directionNav a.nivo-prevNav {
+  background: url(../images/demo/nivoPrev.png) center center no-repeat;
+}
+
+.nivo-directionNav a.nivo-nextNav {
+  background: url(../images/demo/nivoNext.png) center center no-repeat;
+}

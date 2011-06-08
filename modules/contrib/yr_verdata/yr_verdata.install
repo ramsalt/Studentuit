@@ -1,0 +1,212 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the yr_verdata module.
+ */
+
+/**
+* Implementation of hook_requirements()
+*/
+function yr_verdata_requirements($phase) {
+  $requirements = array();
+  $t = get_t();
+  switch ($phase) {
+    case 'install' :
+    if (!function_exists('curl_init')) {
+      $req = 'cURL';
+      $requirements['curl'] = array(
+        'title' => $req,
+        'description' => $t('@req is required for yr_verdata to function properly. This is normally built-in with PHP 5. Contact your server administrator.', array('@req' => $req)),
+        'severity' => REQUIREMENT_ERROR,
+      );
+    }
+    if (!function_exists('simplexml_load_file')) {
+      $req = 'SimpleXML';
+      $requirements['simplexml'] = array(
+        'title' => $req,
+        'description' => $t('@req is required for yr_verdata to function properly. This is normally built-in with PHP 5. Contact your server administrator.', array('@req' => $req)),
+        'severity' => REQUIREMENT_ERROR,
+      );
+    }
+    break;
+  }
+  return $requirements;
+}
+
+/** 
+ * Implementation of hook_install()
+ */
+function yr_verdata_install() {
+  drupal_install_schema('yr_verdata');
+  variable_set('yr_verdata_62', 1);
+}
+
+/** 
+ * Implementation of hook_uninstall()
+ */
+function yr_verdata_uninstall() {
+  drupal_uninstall_schema('yr_verdata');
+  variable_del('yr_verdata_62');
+}
+
+/**
+ * Implementation of hook_schema()
+ */
+function yr_verdata_schema() {
+  $schema['yr_verdata'] = array(
+    'description' => 'Table for stored locations.',
+    'fields' => array(
+      'yid' => array(
+        'description' => 'The unique local identifier for a location.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'url' => array(
+        'description' => 'The url for the forecast at yr.no.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'file' => array(
+        'description' => 'The filename for the cahced forecast. An md5 hash of the url.',
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'lang' => array(
+        'description' => 'The language we want the forecast in.',
+        'type' => 'varchar',
+        'length' => 8,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'name' => array(
+        'description' => 'The name of the location, for sorting purposes.',
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'region' => array(
+        'description' => 'The name of the region, for sorting purposes.',
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'country' => array(
+        'description' => 'The name of the country, for sorting purposes.',
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'weight' => array(
+        'description' => 'Used to sort locations in lists and blocks.',
+        'type' => 'int',
+        'length' => 1,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'updated' => array(
+        'description' => 'The unix timestamp for the last time this location had its feed checked.',
+        'type' => 'int',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array('region' => array('region'), 'country' => array('country')),
+    'primary key' => array('yid'),
+  );
+  return $schema;
+}
+
+/**
+ * Implementation of hook_update_N().
+ * This updates from 6.x-1.x to 6.x-2.x.
+ */
+function yr_verdata_update_6200(&$sandbox) {
+  $ret = array();
+  // Add the new fields.
+  db_add_field($ret, 'yr_verdata', 'file', array('type' => 'varchar', 'not null' => TRUE, 'default' => '', 'length' => 50, 'description' => 'The filename for the cahced forecast. An md5 hash of the url.'));
+  db_add_field($ret, 'yr_verdata', 'lang', array('type' => 'varchar', 'not null' => TRUE, 'default' => '', 'length' => 8, 'description' => 'The language we want the forecast in.'));
+  db_add_field($ret, 'yr_verdata', 'name', array('type' => 'varchar', 'not null' => TRUE, 'default' => '', 'length' => 100, 'description' => 'The name of the location, for sorting purposes.'));
+  db_add_field($ret, 'yr_verdata', 'weight', array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'length' => 1, 'description' => 'Used to sort locations in lists and blocks.'));
+  db_add_field($ret, 'yr_verdata', 'updated', array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'length' => 12, 'description' => 'The unix timestamp for the last time this location had its feed checked.'));
+
+  // Load everything into an array and update each entry with values for the new fields.
+  $records = array();
+  $result = db_query("SELECT * FROM {yr_verdata}");
+  while ($record = db_fetch_object($result)) {
+    $records[] = $record;
+  }
+
+  // All existing data is in the $records array. Drop some fields and recreate them.
+  db_drop_field($ret, 'yr_verdata', 'url');
+  db_drop_field($ret, 'yr_verdata', 'region');
+  db_drop_field($ret, 'yr_verdata', 'country');
+  // Create anew...
+  db_add_field($ret, 'yr_verdata', 'url', array('type' => 'varchar', 'not null' => TRUE, 'default' => '', 'length' => 255, 'description' => 'The url for this location at yr.no.'));
+  db_add_field($ret, 'yr_verdata', 'region', array('type' => 'varchar', 'not null' => TRUE, 'default' => '', 'length' => 100, 'description' => 'The region name for this location.'));
+  db_add_field($ret, 'yr_verdata', 'country', array('type' => 'varchar', 'not null' => TRUE, 'default' => '', 'length' => 100, 'description' => 'The country name for this location.'));
+
+  foreach ($records as $record) { // Update each individual record.
+    // If there are any old files lying around, delete them. We don't need them and can get new ones at first cron run.
+    $comps = explode('/', $record->url);
+    $local_dir = file_directory_path() .'/yr_verdata';
+    $local_file = $local_dir .'/'. implode('_', $comps) .'.xml';
+    file_delete($local_file);
+    // Resolve what the new values are.
+    $url = 'http://www.yr.no/' . $record->url; // The url needs the http://www.yr.no/ at the start in the 6.x-2.x branch.
+    // Make sure we always have a trailing slash.
+    if (drupal_substr($url, -1) != '/') {
+      $url .= '/';
+    }
+    $file = md5($url); // The new filename.
+    // Figure out what language this is.
+    $components = explode('/', drupal_substr($url, 17, -1));
+    switch ($components[0]) {
+      case 'place' : // English
+        $lang = 'en';
+        break;
+      case 'sted' : // Norwegian Bokmål
+        $lang = 'nb';
+        break;
+      case 'stad' : // Norwegian Nynorsk
+        $lang = 'nn';
+        break;
+      case 'paikka' : // Kvääni
+        $lang = 'no-kv';
+        break;
+      case 'sadji' : // Sami
+        $lang = 'smi';
+        break;
+    }
+    // Get the name from the url.
+    $n = count($components) - 1;
+    $name = str_replace('_', ' ', trim($components[$n]));
+    // Create the update query.
+    $query = "UPDATE {yr_verdata} SET url = '$url', file = '$file', lang = '$lang', name = '$name' WHERE yid = $record->yid";
+    // Run the query with the arguments.
+    $ret[] = update_sql($query);
+  }
+  // Add indexes.
+  db_add_index($ret, 'yr_verdata', 'region', array('region'));
+  db_add_index($ret, 'yr_verdata', 'country', array('country'));
+  // Now remove all the old shit.
+  db_drop_field($ret, 'yr_verdata', 'location');
+  db_drop_field($ret, 'yr_verdata', 'subregion');
+  return $ret;
+}
+
+
+
+
+
+
+

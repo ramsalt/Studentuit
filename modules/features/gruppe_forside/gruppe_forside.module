@@ -1,0 +1,40 @@
+<?php
+
+include_once('gruppe_forside.features.inc');
+
+
+
+function gruppe_forside_menu() {
+  $items['hei'] = array(
+    'title' => 'Hjem',
+    'page callback' => 'gruppe_forside_hello',
+    'access callback' => TRUE,
+    'access callback' => 'spaces_access_feature',
+    'access arguments' => array('view', 'gruppe_forside'), 
+    'menu_name' => 'features',
+    );
+  return $items;
+}
+
+function gruppe_forside_hello() {
+  return "";
+}
+
+/* hook_block: creates a block showing the body field of the OG node. */
+
+function gruppe_forside_block($op = 'list', $delta = 0, $edit = array()) {
+  if ($op == 'list') {
+    $blocks[0] = array('info' => t('Gruppens forside'),
+      'weight' => 0, 'status' => 1);
+    return $blocks;
+  }
+  else if ($op == 'view') {
+    $space = spaces_get_space();
+    if ($space) {
+	    $content = check_markup($space->group->body, $space->group->format, FALSE);
+    } else {
+      $content = '';
+    }
+  return array('subject'=>'<none>', 'content'=>$content);
+  }  
+}

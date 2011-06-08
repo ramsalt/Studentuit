@@ -1,0 +1,78 @@
+#yr-content {
+  clear: both;
+}
+#yr-content.ui-tabs .ui-tabs-panel {
+  padding: 1em;
+}
+.yr-forecast-boxes {
+  display: block;
+}
+.yr-period-margin-1 {
+  margin-left: 157px;
+}
+.yr-period-margin-2 {
+  margin-left: 314px;
+}
+.yr-period-margin-3 {
+  margin-left: 471px;
+}
+.yr-forecast-boxes .yr-forecast-box {
+  background: rgb(247,247,247);
+  border: 1px solid rgb(172,172,172);
+  display: inline;
+  float: left;
+  font-size: 90%;
+  margin-bottom: 5px;
+  margin-right: 5px;
+  padding: 5px;
+  width: 140px;
+}
+.yr-symbols img,
+.yr-symbol img,
+.yr-wind img {
+  background: transparent;
+  border: 0;
+}
+.yr-period-time {
+  border-bottom: 1px solid rgb(172,172,172);
+  font-size: 90%;
+  margin: 0;
+  padding: 2px 5px;
+}
+.yr-period-forecast {
+  margin: 0;
+  padding: 2px 5px;
+}
+.yr-period-forecast,
+.yr-period-forecast * {
+  vertical-align: middle;
+}
+.yr-sun,
+.yr-midnightsun {
+  background: url(http://fil.nrk.no/yr/grafikk/sym/b38/01d.png) center left no-repeat;
+  min-height: 25px;
+  padding: 5px 0 3px 45px;
+}
+.yr-polarnight {
+  background: url(http://symbol.yr.no/grafikk/sym/b38/01m.png) center left no-repeat;
+  min-height: 25px;
+  padding: 5px 0 3px 45px;
+}
+.yr-period span {
+  padding-right: 5px;
+}
+.yr-temp {
+  font: bold 120% Arial, Verdana, sans-serif;
+}
+.cold {
+  color: rgb(0,0,255);
+}
+.warm {
+  color: rgb(255,0,0);
+}
+p.yr-precip,
+p.yr-pressure {
+  font-size: 85%;
+  margin: 5px 0;
+  padding: 0;
+}

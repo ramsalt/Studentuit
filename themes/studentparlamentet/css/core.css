@@ -1,0 +1,54 @@
+/**
+ * Console ============================================================
+ */
+div.messages {
+  padding:15px;
+  color:#036;
+  background-color:#f8f8f8;
+  border:5px solid #fff;
+  margin:5px 0;
+}
+
+table {
+  width: 100%;
+}
+
+th {
+  font-weight: bold;
+}
+
+td {
+  padding: 10px 2px;
+  background: white;
+}
+
+td.active {
+  background: #d1e4cf;
+}
+
+table tr.warning th,
+div.warning {
+  color:#a84;
+  background-color:#fff4c0;
+}
+
+table tr.error th,
+div.error {
+  color:#965;
+  background-color:#ffe4e0;
+}
+
+table tr.ok th,
+table tr.info th,
+div.status {
+  color:#687;
+  background-color:#ecf8f4;
+}
+
+div.error   { border-color:#fff8f4; }
+div.warning { border-color:#fffce4; }
+div.status  { border-color:#f8fffc; }
+
+.block {
+  margin-top: 30px;
+}

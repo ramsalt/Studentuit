@@ -1,0 +1,63 @@
+<?php
+// $Id: views_gallery.install,v 1.15 2010/06/05 13:56:24 karens Exp $
+
+/**
+ * @file
+ * Install file for image gallery feature.
+ * 
+ * Adds Image and Gallery content types.
+ */
+
+/**
+ * Create a custom pager for navigating inside a gallery.
+ */
+function _views_gallery_create_pager() {
+  $pid = variable_set('views_gallery_pager', NULL);
+  if (module_exists('custom_pagers') && empty($pid)) {
+    $pager = new stdClass();
+    $pager->title = 'Views gallery pager';
+    $pager->position = 'both';
+    $pager->view = 'gallery';
+    $pager->args = '[field_gallery-nid]';
+    $pager->node_type = views_gallery_image_type();
+    _custom_pagers_save_pager($pager);
+    variable_set('views_gallery_pager', $pager->pid);
+  }
+}
+
+function _views_gallery_delete_pager() {
+  if (module_exists('custom_pagers')) {
+    // Remove the pager.
+    _custom_pagers_delete_pager(variable_get('views_gallery_pager', NULL));
+  }
+  variable_del('views_gallery_pager');
+}
+
+/**
+ * Implementation of hook_enable();
+ */
+function views_gallery_enable() {
+  // Create the custom pager
+  _views_gallery_create_pager();
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function views_gallery_uninstall() {
+  _views_gallery_delete_pager();
+}
+
+function views_gallery_update_6000() {
+  $ret = array();
+  if (module_exists('custom_pager')) {
+    _views_gallery_create_pager();
+  }
+  // For updates only, set these values to what
+  // we were using before so we don't break
+  // existing installations. The defaults for
+  // new installations will not use 'image'.
+  variable_set('views_gallery_image_type', 'image');
+  variable_set('views_gallery_gallery_type', 'gallery');
+  return $ret;
+}

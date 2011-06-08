@@ -1,0 +1,367 @@
+body {
+/*  background-color:#efefef;*/ 
+/*  background: #474747;*/
+  background: #d1e4cf;
+  
+}
+
+.clear {
+ height: 20px;
+}
+
+div.page-wrap {
+  background-color:#efefef;
+}
+/*  === SITEBAR STYLES ===  */
+
+#sitebar {
+/*  background: url(../images/tuil/sitebar-bg.png) top left repeat-x; */
+  background: #d1e4cf;
+  height:34px;
+  font-size:.85em;
+/*  color:#aedbf3; */ 
+}
+
+#sitebar a {
+  text-decoration: none;
+  color:gray;
+}
+
+#sitebar .sitebar-content {
+  padding:0;
+}
+
+#sitebar .sitelinks {
+  float:left;
+}
+
+#sitebar .sitelinks {
+color: white;
+padding: 0 10px;
+margin: 5px 0;
+background: #7fbf78;
+-webkit-border-radius: 5px;
+}
+
+#sitebar .sitelinks img {
+  float: left;
+  margin-top: 3px;
+}
+
+#sitebar .sitelinks p {
+  float: left;
+  color: white;
+  font-size: 110% ;
+  margin: 3px 10px;
+}
+
+#sitebar .sitelinks .global-links {
+  margin-left:100px;
+  }
+
+#sitebar .sitelinks .global-links ul { 
+  display: inline;
+  float: left;
+}
+
+#sitebar .sitelinks .global-links ul li {
+  margin: 0;
+  display: inline;
+}
+
+#sitebar .sitelinks .global-links ul li a {
+}
+
+#sitebar .sitelinks .global-links ul li.active a {
+/*  background-color:#7fbf78; */ 
+  text-decoration: underline;
+  color:#fff;
+}
+
+#sitebar .sitelinks .label {
+  text-transform: none;
+}
+
+#sitebar .sitelinks ul {
+  margin:0;
+  padding:0;
+  list-style: none;
+}
+
+#sitebar .sitelinks ul li {
+  display:inline;
+}
+
+#sitebar .sitelinks ul li span,
+#sitebar .sitelinks ul li a {
+  float:left;
+  display: block;
+  padding:7px 5px 3px 5px;
+}
+
+#sitebar .sitelinks ul li a.selected {
+  background: url(../images/tuil/sitebar-tap.png) top center no-repeat; 
+  color:#fff;
+}
+
+#sitebar .userlinks {
+  float:right;
+  padding:5px 0 0 0;
+}
+
+#sitebar .userlinks ul li {
+  margin:0!important;
+}
+
+#sitebar .userlinks .userlogin a,
+#sitebar .userlinks .userregister a {
+  font-weight: bold;
+  color: #fff;
+}
+
+#sitebar .userlinks .messages {
+  background: url(../images/tuil/icon-sitebar-messages.png) center left no-repeat;
+  padding-left:23px;
+}
+
+#sitebar .userlinks .userlogout {
+  background: url(../images/tuil/icon-sitebar-logout.png) center left no-repeat; 
+  padding-left:15px;
+}
+
+/*  === TOPMENU STYLES ===  */
+
+#topmenu {
+  height:78px;
+  background: url(../images/tuil/menubar-bg.png) top left repeat-x; 
+  margin-bottom:10px;
+}
+
+#topmenu .topmenu-content {
+  padding-top:18px;
+}
+
+#topmenu .logo {
+  float:left;
+  position: absolute;
+  top: 33px;
+  background: none;
+  text-align: center;
+}
+
+#topmenu .logo a {
+  display:block;
+  height:64px;
+}
+
+
+#topmenu .search {
+  float:right;
+  padding-top:12px;
+  width: 195px;
+}
+
+#topmenu .search .search-box {
+  padding-left:30px;
+  background: #fff url(../images/tuil/icon-menubar-search.png) 5px center no-repeat;
+  border:solid 3px #e1e1e1;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+
+#topmenu .search .search-box input {
+  border:none;
+  padding:8px 0;
+  outline:none;
+  color:#999;
+  width: 140px;
+}
+
+#topmenu span.slogan {
+  font-style: italic;
+  font-weight: thin;
+  font-size: 130%;
+  color: gray;
+}
+
+/*  === PAGE STYLES ===  */
+
+.box {
+/*  background-color: #fff; WHY?? */ 
+}
+
+.box .box-content {
+  padding:10px;
+}
+
+#page {
+  background-color:#fff;
+  width: 960px;
+  margin:auto;
+  padding: 0;
+  margin-bottom: 20px;
+  /*
+  -webkit-box-shadow: 0px 0px 4px #999;
+  -moz-box-shadow: 0px 0px 4px #999;
+  box-shadow: 0px 0px 4px #999;
+  border: solid 4px rgba(0, 0, 0, .2);
+  */
+  border: solid 8px #fff;
+  -webkit-border-radius: 5px;
+}
+
+#page .right .box.region {
+  border-left: solid 1px #efefef;
+}
+
+block-template-preprocess-page-content-creation-link {
+
+}
+
+#block-template-preprocess-page-content-creation-link a {
+  display: block;
+  background-color: #ccc;
+	background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(1, rgb(230,230,230)),
+    color-stop(0, rgb(196,196,196))
+  );
+  background-image: -moz-linear-gradient(
+      center bottom,
+      rgb(230,230,230) 100%,
+      rgb(196,196,196) 0%
+  );
+	padding:5px 10px 6px 10px;
+	font-weight:bold;
+	text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
+	text-decoration: none;
+	color:#333;
+	text-align: center;
+	border:1px solid rgba(0,0,0,0.4);
+	-moz-border-radius: 5px;
+	-moz-box-shadow: 0px 0px 2px rgba(0,0,0,0.5);
+	-webkit-border-radius: 5px;
+	-webkit-box-shadow: 0px 0px 2px rgba(0,0,0,0.5);
+}
+
+/*  === GROUP STYLES ===  */
+
+.group-header {
+  
+}
+
+.group-header h1 {
+  background-color: #7fbf78;
+  display: inline ;
+  float: left;
+  margin-right: 10px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+}
+
+.group-header h1 a {
+  padding: 10px;
+  margin: 0;
+  color: #fff;
+  text-decoration: none;
+  font-weight: normal;
+
+}
+
+.tools-menu-container {
+
+}
+
+.tools-menu-container ul {
+/*  margin:0 0 0 5px;
+  padding:3px 0 0 0;*/ 
+  list-style:none;
+  display: table;
+}
+
+.tools-menu-container ul li {
+  margin:0;
+  padding:0;
+}
+
+.tools-menu-container ul li a {
+  float:left;
+  color:#000;
+  text-decoration: none;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  margin: 4px;
+}
+
+.tools-menu-container ul li.active a {
+  background-color:#d1e4cf;
+  padding: 1px 5px;
+  margin: 4px;
+  color:#000;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+
+  /*
+  background-color: #fff;
+  color: #0f4b6d;
+  -webkit-border-top-left-radius: 2px;
+  -webkit-border-top-right-radius: 5px;
+  -moz-border-radius-topleft: 5px;
+  -moz-border-radius-topright: 5px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  */
+}
+
+.block h2 {
+  color: #666;
+  font-size: 100%;
+  text-align: right;
+  text-transform: uppercase;
+  border-bottom: solid 2px #478440;
+}
+
+div.dateblock {
+/*  font-family: 'Lucida Grande';*/
+  width: 45px; 
+  border-top: solid 1px #ccc;
+  border-bottom: solid 1px #ccc;
+  border-right: solid 1px #ccc;
+  border-left: solid 1px #ccc;
+}
+
+div.dateblock span {
+  display:block;
+  text-align:center;
+}
+
+div.dateblock span.day {
+  font-size:.8em;
+  background-color:#f24f26;
+  color:white;
+  padding: 2px;
+  font-weight: bold;
+  text-transform:uppercase;
+}
+
+
+div.dateblock span.date {
+  font-weight: normal;
+  font-size:1.3em;
+  padding: 0;
+  background: #eee;
+}
+
+div.dateblock span.month {
+  font-size:.7em;
+  padding:0 2px;
+  text-transform:uppercase;
+  background: #eee;
+  color: gray;
+}
+
+
+

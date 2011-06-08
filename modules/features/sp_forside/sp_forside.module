@@ -1,0 +1,20 @@
+<?php
+
+include_once('sp_forside.features.inc');
+
+function sp_forside_menu() {
+  $items['hjem'] = array(
+    'title' => 'Hjem',
+    'page callback' => 'sp_forside_hello',
+    'access callback' => TRUE,
+/*    'access callback' => 'spaces_access_feature',
+    'access arguments' => array('view', 'sp_forside'), 
+    'menu_name' => 'menu-global', */ 
+    'type' => 'MENU_CALLBACK',
+    );
+  return $items;
+}
+
+function sp_forside_hello() {
+  return "(kan embedde view her)";
+}

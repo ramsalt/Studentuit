@@ -1,0 +1,80 @@
+<div id="frontpage" class="container_12">
+  <div class="grid_8">
+    <div class="box slideshow"><div class="box-content">
+      
+      <div id="fpslider">
+        <img src="<?php print $base_path . drupal_get_path( 'theme', 'astroboy'); ?>/images/demo/fp_slide1.png" />
+        <img src="<?php print $base_path . drupal_get_path( 'theme', 'astroboy'); ?>/images/demo/fp_slide2.png" />
+        <img src="<?php print $base_path . drupal_get_path( 'theme', 'astroboy'); ?>/images/demo/fp_slide3.png" />
+      </div>
+      
+    </div></div>
+  </div>
+  <div class="grid_4">
+    <div class="box nextmatch"><div class="box-content">
+      neste kamp
+    </div></div>
+    <div class="clear"></div>
+    <div class="box mainsponsor"><div class="box-content">
+      hovedsponsor
+    </div></div>
+  </div>
+  
+  <div class="clear"></div>
+  
+  <div class="grid_12">
+    <div class="box membership"><div class="box-content">bli medlem</div></div>
+  </div>
+  
+  <div class="clear"></div>
+  
+  <div class="grid_4">
+    <div class="box latestnews"><div class="box-content">
+      <?php
+        $latest = module_invoke('views','block','view', 'latest_news-block_1');
+        print $latest['content'];
+      ?>
+    </div></div>
+  </div>
+  
+  <div class="grid_4">
+    <div class="box events"><div class="box-content">
+      neste kalenderhendelser
+    </div></div>
+  </div>
+  
+  <div class="grid_4">
+    <div class="box teams"><div class="box-content">
+      finn ditt lag
+    </div></div>
+  </div>
+  
+  <div class="clear"></div>
+  
+  <div class="grid_3">
+    <div class="box"><div class="box-content">
+      grid_3
+    </div></div>
+  </div>
+  
+  <div class="grid_3">
+    <div class="box"><div class="box-content">
+      grid_3
+    </div></div>
+  </div>
+  
+  <div class="grid_3">
+    <div class="box"><div class="box-content">
+      grid_3
+    </div></div>
+  </div>
+  
+  <div class="grid_3">
+    <div class="box"><div class="box-content">
+      grid_3
+    </div></div>
+  </div>
+  
+  <div class="clear"></div>
+  
+</div>

@@ -1,0 +1,86 @@
+
+.calendar-calendar tr td.today,
+.calendar-calendar tr.odd td.today,
+.calendar-calendar tr.even td.today {
+  background-color:#d1e4cf;
+}
+
+
+.calendar-calendar td .inner div.calendar div,
+.calendar-calendar td .inner div.calendar div a {
+  border:none;
+  background: #7fbf78;
+  color: white;
+  padding:0 2px;
+}
+
+
+.calendar-calendar div.date-nav {
+  background-color:#fff;
+  color:#777;
+  padding:0.2em;
+  width:auto;
+  border: none;
+}
+
+.calendar-calendar td.empty {
+  background: #eee; 
+}
+
+
+/* formatting for the full day view */  
+.calendar-calendar td.calendar-agenda-hour {
+  font-family: inherit;
+  font-size: 90%;
+  font-weight: normal;
+  text-align:right;
+  border:none;
+  border-top:1px #333 dotted;
+  padding-top:.25em;
+  width:1%;
+}
+
+/* slideshow block on front page */ 
+#block-views-site_featured-block_1 {
+  height: 260px;
+  background: #eee;
+  width: 100%;
+  border: solid 1px gray;
+}
+
+#block-views-site_featured-block_1 .views-field-title {
+  font-size: 200%;
+  background: black;
+  color: white;
+  margin-top: 160px;
+  padding: 15px;
+}
+
+#block-views-grupper-block_1 {
+
+}
+
+#block-views-grupper-block_1 .views-field-field-group-icon-fid {
+  float: left;
+  margin-right: 5px;
+}
+
+#block-views-Kalender-block_1 .views-row {
+  display: table;
+  clear: both;
+  margin-top: 10px;
+}
+
+#block-views-Kalender-block_1 .views-field-title {
+  float: left;
+}
+
+#block-views-Kalender-block_1 .views-field-field-date-value {
+  float: left;
+  margin-right: 10px;
+}
+
+#block-views-Kalender-block_1 .views-field-body {
+  color: gray;
+  margin-top: 20px;
+}
