@@ -2,18 +2,14 @@
 
 
 function studentparlamentet_preprocess_node(&$vars) {
-  // lager tre datovariabler så man kan lage kalender-styling på stuff - brukes ikke enda. 
-  // variablene til node 
+  // lager tre datovariabler så man kan lage kalender-styling
   $node = $vars['node'];
-  // legger til nye verdier i arrayet over. format_date er en Drupal-funksjon. Disse kan nå brukes i 
-  // node.tpl.php (men ikke andre .tmp.php-filer?)
   $vars['dato_dag'] = format_date($node->created, 'custom', 'j');
   $vars['dato_mnd'] = format_date($node->created, 'custom', 'M');
   $vars['dato_aar'] = format_date($node->created, 'custom', 'Y');
 }
 
 function studentparlamentet_preprocess_page(&$vars, $hook) {
-
   // Currently logged in user 
   global $user;
   

@@ -103,7 +103,7 @@
           <div class="sitelinks">
             <div class="sitename">
               <a href="<?php print $base_path;?>">
-              <img src="<?php print $directory;?>/images/home-icon.png"> 
+              <img src="<?php print $base_path . path_to_theme() . '/images/home-icon.png';?>"> 
               <p><?php print $site_name; ?></p>
               </a>
             </div>
