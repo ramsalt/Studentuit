@@ -1,0 +1,86 @@
+<?php
+/** 
+ * Implementation of hook_install()
+ */
+function fb_events_install() {
+  drupal_install_schema('fb_events');
+}
+
+/** 
+ * Implementation of hook_uninstall()
+ */
+function fb_events_uninstall() {
+  drupal_uninstall_schema('fb_events');
+}
+function fb_events_schema(){
+  $schema = array();
+  
+  $schema['fb_events'] = array(
+    'description' => 'Mapping between organic group and facebook page.',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'Node id.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'vid' => array(
+        'description' => 'Node version.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'fbid' => array(
+        'description' => "Facebook id",
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'size' => 'big',
+      ),
+      'name' => array(
+        'description' => 'The facebook page name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+
+      ),
+      'uid' => array(
+        'description' => 'User.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'access_token' => array(
+        'description' => 'The facebook access_token for this group.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+
+      ),
+    ),
+    'primary key' => array('vid'),
+    'indexes' => array('nid' => array('nid'), 'fbid' => array('fbid')),
+  );
+  $schema['fb_events_mapping'] = array(
+    'description' => 'Mapping between drupal events and facebook events.',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'Node id.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'fbid' => array(
+        'description' => "Facebook id",
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'size' => 'big',
+      ),
+
+    ),
+    'primary key' => array('nid'),
+    'indexes' => array('fbid' => array('fbid')),
+  ); 
+  return $schema;
+}

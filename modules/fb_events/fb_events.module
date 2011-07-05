@@ -1,0 +1,236 @@
+<?php
+
+
+
+function fb_events_form_alter(&$form, $form_state, $form_id){
+  if($form_id == 'hendelse_node_form'){
+    
+    if(count($form['#node']->og_groups)){
+      $gid = array_pop($form['#node']->og_groups);
+    }elseif($form_state['og_gids']){
+      $gid =  $form_state['og_gids'][0];
+    }
+    if(!isset($gid)) return;
+
+    $group = node_load($gid);
+    $form['facebook'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Facebook'),
+      '#weight' => 5,
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+    );
+    if($group->facebook['page_id']){
+      $form['facebook']['fb_page_name'] = array(
+        '#type' => 'item',
+        '#title' => t('Facebook page'),
+        '#value' => $group->facebook['name'],
+      );
+    }
+    $default_value = 0;
+    $query = db_query("SELECT fbid FROM {fb_events_mapping} WHERE nid LIKE %d", $form['#node']->nid);
+    $fb_event_id = db_result($query);
+    if($fb_event_id >0){
+      $default_value = 1;
+    }
+    
+    $form['facebook']['fb_publish'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Publish to facebook'),
+      '#default_value' => $default_value,
+    );
+    
+    
+  }
+  elseif($form_id == 'gruppe_node_form'){
+    $form['facebook'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Facebook settings'),
+      '#weight' => 5,
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+    );
+    $options[0]=t('None');
+    if(isset($GLOBALS['_fb']) && $fbu=fb_facebook_user()){
+      global $_fb;
+      $session = $_fb->getSession();
+      $result = $_fb->api('me/accounts');
+      foreach($result['data'] as $account){
+        if($account['category'] != 'Application'){
+          $options[$account['id']] = $account['name'];
+          $tokens[$account['id']] = $account['access_token'];
+          $fb_names[$account['id']] = $account['name'];
+        }
+      }
+    }
+    
+    // if user is fb-admin of current connected group add current as default
+    if(array_key_exists($form['#node']->facebook['page_id'], $options)){
+      $default_value=$form['#node']->facebook['page_id'];
+    }else{
+    // if user is not fb-admin , the page will not appear in list, therfor we add it to the list
+      $options[$form['#node']->facebook['page_id']] = $form['#node']->facebook['name'];
+      $default_value=$form['#node']->facebook['page_id'];
+    }
+    
+      $form['facebook']['fb_pages'] = array(
+        '#type' => 'select',
+        '#title' => t('Connect this group to a facebook page'),
+        '#default_value' => $default_value,
+        '#options' => $options,
+        '#description' => t('What facebook page will events be posted to?'),
+      );
+      $form['facebook']['access_tokens'] = array(
+        '#type' => 'hidden',
+        '#value' => serialize($tokens),
+      );
+      $form['facebook']['fb_names'] = array(
+        '#type' => 'hidden',
+        '#value' => serialize($fb_names),
+      );
+  }
+}
+
+function fb_events_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  // page id = 113405612082138
+  
+
+  if($op == 'view'){
+  
+  }
+  elseif($op == 'delete'){
+    db_query('DELETE FROM {fb_events} WHERE nid = %d', $node->nid);
+    if($node->type == 'hendelse'){
+      fb_event_delete($node);
+      db_query('DELETE FROM {fb_events_mapping} WHERE nid = %d', $node->nid);
+    }
+  }
+  elseif($op == 'update'){
+    if($node->type == 'gruppe'){
+      $tokens = unserialize($node->access_tokens);
+      $fb_names = unserialize($node->fb_names);
+      if($node->fb_pages>0){
+        drupal_set_message('update');
+        db_query('DELETE FROM {fb_events} WHERE vid = %d', $node->vid);
+        db_query('INSERT INTO {fb_events} (nid, vid, fbid, name, uid, access_token) VALUES (%d, %d, %d, "%s", %d, "%s")', $node->nid, $node->vid, $node->fb_pages, $fb_names[$node->fb_pages], $node->uid, $tokens[$node->fb_pages]);
+      }else{
+        db_query('DELETE FROM {fb_events} WHERE vid = %d', $node->vid);
+      }
+    }
+    elseif($node->type == 'hendelse'){
+      if($node->fb_publish == 1){
+        // publish or update
+        fb_event_publish($node);
+      }
+      elseif($node->fb_publish == 0){
+        // delete fb event
+        //fb_event_delete();
+      }
+    }
+  }elseif($op == 'insert'){
+    if($node->fb_pages>0 && $node->type == 'gruppe'){
+      db_query('INSERT INTO {fb_events} (nid, vid, fbid, name, uid, access_token) VALUES (%d, %d, %d, "%s", %d, "%s")', $node->nid, $node->vid, $node->fb_pages, $fb_names[$node->fb_pages], $node->uid, $tokens[$node->fb_pages]);
+    }
+    elseif($node->type == 'gruppe' && $node->fb_publish == 1){
+      fb_event_publish($node);
+    }
+  }elseif($op == 'load'){
+    if($node->type == 'gruppe'){
+      $query = db_query('SELECT fbid, uid, name, access_token FROM {fb_events} WHERE vid = %d', $node->vid);
+      $page = db_fetch_object($query);
+      return array(
+        'facebook' => array(
+          'page_id' => $page->fbid,
+          'uid' => $page->uid,
+          'name' => $page->name,
+          'access_token' => $page->access_token,
+        ),
+      );
+    }
+  }
+}
+function fb_event_publish($node, $page_id = NULL, $access_token = NULL){
+
+  if($page_id == NULL && $access_token == NULL){
+    $gid = array_pop($node->og_groups);
+    $group = node_load($gid);
+    $page_id = $group->facebook['page_id'];
+    $access_token = $group->facebook['access_token'];
+  }
+  $query = db_query("SELECT fbid FROM {fb_events_mapping} WHERE nid LIKE %d", $node->nid);
+  $fb_event_id = db_result($query);
+  $exsists = FALSE;
+  if($fb_event_id > 0){
+    $exsists = TRUE;
+  }
+  
+  $description = $node->body;
+  $start_time = $node->field_date[0]['value'];
+  $end_time = $node->field_date[0]['value2'];
+  
+  $params = array(
+    'name'=> $node->title,
+    'page_id' => $page_id,
+    'description' => $description,
+    'privacy' => 'OPEN', //'OPEN', 'CLOSED', or 'SECRET'
+    'start_time' => $start_time,
+    'end_time' => $end_time,
+    'access_token' => $access_token,
+  );
+  $method=$page_id.'/events';
+  
+  //make new fb event
+  if(!$exsists){
+    $event=_post_to_fb($method, $params);
+  }
+  else{
+    $method = '/'.$fb_event_id;
+   // $params['id'] = $fb_event_id;
+    $event=_post_to_fb($method, $params);
+  }
+  
+  if(is_array($event) && $event['id']) {
+    if(!$exsists){
+
+      db_query('INSERT INTO {fb_events_mapping} (nid, fbid) VALUES (%d, %d)', $node->nid, $event['id']);
+    }
+  }
+}
+function fb_event_delete($node, $page_id = NULL, $access_token = NULL){
+  if($page_id == NULL && $access_token == NULL){
+    $gid = array_pop($node->og_groups);
+    $group = node_load($gid);
+    $page_id = $group->facebook['page_id'];
+    $access_token = $group->facebook['access_token'];
+  }
+  $query = db_query("SELECT fbid FROM {fb_events_mapping} WHERE nid LIKE %d", $node->nid);
+  $fb_event_id = db_result($query);
+  $exsists = FALSE;
+  if($fb_event_id > 0){
+    $exsists = TRUE;
+  }else{
+    return;
+  }  
+  global $_fb;
+  $result = $_fb->api(
+                    '/'.$fb_event_id.'?method=delete&access_token='.$access_token,
+                     array(),
+                    'POST'
+  );
+  
+}
+function _post_to_fb($method, $params){
+  $url = "https://graph.facebook.com/$method?";
+  
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL,$url);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+  $result = curl_exec($ch);
+  $decoded = json_decode($result, true);
+  curl_close($ch);
+  return $decoded;
+  
+}
+
