@@ -1,0 +1,9 @@
+name = Next bus
+description = Show next bus departures
+php = 5
+core = 6.x
+
+version = "6.x-1.x"
+core = "6.x"
+project = "Other"
+
