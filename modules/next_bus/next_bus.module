@@ -35,17 +35,28 @@ function next_bus_block($op = 'list', $delta = 0, $edit = array()) {
 }
 
 function _next_buses(){
-  $html = '';
-  $url = variable_get('next_bus_url_to_fetch',  'http://www.reiskollektivt.no/tfk/tekstvisning_inlined.php?mapid=853');
-  
-  $result = drupal_http_request($url);
-  if($result->code == 200){
-    $html = $result->data;
-    $html = strip_tags($html, '<p><i><b><br><table><tbody><tr><td>');
-    $html = str_replace('Neste Avgang', '', $html);
-  }else{
-    watchdog('next_bus', 'The feed from %site seems to be broken, due to "%error".', array('%site' => 'neste avgang', '%error' => $result->code . ' ' . $result->error), WATCHDOG_WARNING);
+  if (($cache = cache_get('nex_bus:next_departure', 'cache'))
+      && !empty($cache->data)
+      && (time() < $cache->expire)) //check expiration manually
+  {
+    //use $cache->data
+    $html = $cache->data;
   }
+  else{
+    //do expensive processing and store result in the cache
 
+    $html = '';
+    $url = variable_get('next_bus_url_to_fetch',  'http://www.reiskollektivt.no/tfk/tekstvisning_inlined.php?mapid=853');
+    
+    $result = drupal_http_request($url);
+    if($result->code == 200){
+      $html = $result->data;
+      $html = strip_tags($html, '<p><i><b><br><table><tbody><tr><td>');
+      $html = str_replace('Neste Avgang', '', $html);
+    }else{
+      watchdog('next_bus', 'The feed from %site seems to be broken, due to "%error".', array('%site' => 'neste avgang', '%error' => $result->code . ' ' . $result->error), WATCHDOG_WARNING);
+    }
+    cache_set('nex_bus:next_departure', $html, 'cache', time()+60);
+  }
   return $html;
 }
