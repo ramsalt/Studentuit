@@ -41,7 +41,8 @@ function _next_buses(){
   $result = drupal_http_request($url);
   if($result->code == 200){
     $html = $result->data;
-    $html = strip_tags($html, '<p><i><b><br><table><tbody><tr><td>');    
+    $html = strip_tags($html, '<p><i><b><br><table><tbody><tr><td>');
+    $html = str_replace('Neste Avgang', '', $html);
   }else{
     watchdog('next_bus', 'The feed from %site seems to be broken, due to "%error".', array('%site' => 'neste avgang', '%error' => $result->code . ' ' . $result->error), WATCHDOG_WARNING);
   }
