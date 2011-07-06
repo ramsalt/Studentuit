@@ -1,35 +1,31 @@
 <?php
+
 function next_bus_block($op = 'list', $delta = 0, $edit = array()) {
   if ($op == 'list') {
-    $blocks[0] = array(
-      'info' => t('Show next departures'), 
-      'weight' => 0, 
-      'status' => 1, 
-      'region' => '',
+    $blocks[1] = array(
+      'info' => t('Next bus departure'), 
       'cache' => BLOCK_NO_CACHE,
     );
 
-
     return $blocks;
   }
-  else if ($op == 'configure' && $delta == 0) {
+  else if ($op == 'configure' && $delta == 1) {
     $form['url_to_fetch'] = array(
       '#type' => 'textfield', 
       '#title' => t('Url to fetch'), 
       '#value' => variable_get('next_bus_url_to_fetch',  'http://www.reiskollektivt.no/tfk/tekstvisning_inlined.php?mapid=853'), 
-
     );
     return $form;
-  }
-  else if ($op == 'save' && $delta == 0) {
+  }  
+  else if ($op == 'save' && $delta == 1) {
     variable_set('next_bus_url_to_fetch', $edit['url_to_fetch']);
   }
   else if ($op == 'view') {
     switch ($delta) {
-      case 0:
+      case 1:
         // Your module will need to define this function to render the block.
         $block = array(
-          'subject' => t('Next departures'), 
+          'subject' => t('Next bus departures'), 
           'content' => _next_buses(),
         );
         break;
@@ -41,12 +37,14 @@ function next_bus_block($op = 'list', $delta = 0, $edit = array()) {
 function _next_buses(){
   $html = '';
   $url = variable_get('next_bus_url_to_fetch',  'http://www.reiskollektivt.no/tfk/tekstvisning_inlined.php?mapid=853');
-  $result = drupal_http_request($url);
   
+  $result = drupal_http_request($url);
   if($result->code == 200){
     $html = $result->data;
+    $html = strip_tags($html, '<p><i><b><br><table><tbody><tr><td>');    
   }else{
     watchdog('next_bus', 'The feed from %site seems to be broken, due to "%error".', array('%site' => 'neste avgang', '%error' => $result->code . ' ' . $result->error), WATCHDOG_WARNING);
   }
+
   return $html;
 }
