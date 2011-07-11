@@ -35,7 +35,8 @@ function next_bus_block($op = 'list', $delta = 0, $edit = array()) {
 }
 
 function _next_buses(){
-  if (($cache = cache_get('nex_bus:next_departure', 'cache'))
+  drupal_add_css(drupal_get_path('module', 'next_bus').'/next_bus.css');
+  if (($cache = cache_get('nex_bus:next_departure', 'cache') && FALSE)
       && !empty($cache->data)
       && (time() < $cache->expire)) //check expiration manually
   {
@@ -53,6 +54,9 @@ function _next_buses(){
       $html = $result->data;
       $html = strip_tags($html, '<p><i><b><br><table><tbody><tr><td>');
       $html = str_replace('Neste Avgang', '', $html);
+      $html = str_replace('&gt;', ' n', $html);
+      $html = str_replace(' > ', ' → ', $html);
+      //$html = str_replace(array("&lt;", "&gt;"), array("<", "n"), htmlspecialchars($html, ENT_NOQUOTES, "UTF-8"));
     }else{
       watchdog('next_bus', 'The feed from %site seems to be broken, due to "%error".', array('%site' => 'neste avgang', '%error' => $result->code . ' ' . $result->error), WATCHDOG_WARNING);
     }
