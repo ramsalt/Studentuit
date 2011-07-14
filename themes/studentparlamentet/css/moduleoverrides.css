@@ -69,6 +69,7 @@
   display: table;
   clear: both;
   margin-top: 10px;
+  width: 100%;
 }
 
 #block-views-Kalender-block_1 .views-field-title {
