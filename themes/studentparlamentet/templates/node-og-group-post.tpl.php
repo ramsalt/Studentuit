@@ -1,8 +1,11 @@
 <?php
-// $Id: node.tpl.php,v 1.4.2.1 2009/08/10 10:48:33 goba Exp $
+// $Id: node-og-group-post.tpl.php,v 1.3 2008/11/09 17:17:54 weitzman Exp $
 
 /**
- * @file node.tpl.php
+ * @file node-og-group-post.tpl.php
+ * 
+ * Og has added a brief section at bottom for printing links to affiliated groups.
+ * This template is used by default for non group nodes.
  *
  * Theme implementation to display a node.
  *
@@ -15,7 +18,7 @@
  *   format_date()).
  * - $links: Themed links like "Read more", "Add new comment", etc. output
  *   from theme_links().
- * - $name: Themed username of node author output from theme_username().
+ * - $name: Themed username of node author output from theme_user().
  * - $node_url: Direct url of the current node.
  * - $terms: the themed list of taxonomy term links output from theme_links().
  * - $submitted: themed submission information output from
@@ -52,41 +55,24 @@
 
 <?php print $picture ?>
 
-<?php if ($page): ?>
-  <h1><?php print $title; ?></h1>
-<?php else: ?>
+<?php if (!$page): ?>
   <h2><a href="<?php print $node_url ?>" title="<?php print $title ?>"><?php print $title ?></a></h2>
 <?php endif; ?>
-  
+
   <div class="meta">
-    <ul>
-    <?php
-      $author = user_load($node->uid);
-    ?>
-      <li>Av <?php print l($author->name, 'user/' . $author->uid); ?></li>
-      <li><?php print format_date($node->changed, 'custom', 'H:i - d F Y'); ?></li>
-      <?php if ($comment_count > 0) : ?>
-      <li><?php print $comment_count; ?> kommentarer</li>
-      <?php endif; ?>
-      
-      <?php 
-        if (count($node->taxonomy) > 0) : 
-        
-          foreach ($node->taxonomy as $tax) {
-            $taxes[] = l($tax->name, 'term/' . $tax->tid);
-          }
-        
-      ?>
-      
-      <li><?php print implode(', ', $taxes); ?></li>
-      <?php endif; ?>
-      
-    </ul>
+  <?php if ($submitted): ?>
+    <span class="submitted"><?php print $submitted ?></span>
+  <?php endif; ?>
+
+  <?php if ($terms): ?>
+    <div class="terms terms-inline"><?php print $terms ?></div>
+  <?php endif;?>
   </div>
 
   <div class="content">
     <?php print $content ?>
   </div>
+
 
   <?php print $links; ?>
 </div>
