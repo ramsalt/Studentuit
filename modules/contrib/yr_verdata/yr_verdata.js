@@ -6,10 +6,15 @@ Drupal.behaviors.yr_verdataTabs = function (context) {
   // Remove the useless div.
   $("#yr-content>.item-list").remove();
   // Add the tabs.
-  if ($.ui.version.match('1.7') || $.ui.version.match('1.8')) { // Modern, for those using jquery_update module.
-    $("#yr-content").tabs();
+  try{
+    if ($.ui.version.match('1.7') || $.ui.version.match('1.8')) { // Modern, for those using jquery_update module.
+      $("#yr-content").tabs();
+    }
+    if ($.ui.version.match('1.6')) { // Not so modern.
+      $("#yr-content > ul").tabs();
+    }
+  }catch(e){
+    
   }
-  if ($.ui.version.match('1.6')) { // Not so modern.
-    $("#yr-content > ul").tabs();
-  }
+
 }

@@ -1,0 +1,211 @@
+# Copyright (C) 2010 SFCe - Create Event
+# This file is distributed under the same license as the SFCe - Create Event package.
+msgid ""
+msgstr ""
+"Project-Id-Version: SFCe - Create Event 3.94.3\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/sfce-create-event\n"
+"POT-Creation-Date: 2011-01-28 13:14:36+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2010-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: sfce-settings-page.php:19
+msgid "Failed security check. Reload page and retry"
+msgstr ""
+
+#: sfce-settings-page.php:38
+msgid "Facebook Event options updated."
+msgstr ""
+
+#: sfce-settings-page.php:44 sfce-settings-page.php:73
+#: sfce-settings-page.php:75 sfce_create_event_post.php:93
+#: sfce_create_event_post.php:95 sfce_create_event_post.php:130
+msgid "%s"
+msgstr ""
+
+#: sfce-settings-page.php:53
+msgid "Create Facebook Event Configuration"
+msgstr ""
+
+#: sfce-settings-page.php:60
+msgid "Default values for new events"
+msgstr ""
+
+#: sfce-settings-page.php:64
+msgid "Option"
+msgstr ""
+
+#: sfce-settings-page.php:66
+msgid "Value"
+msgstr ""
+
+#: sfce-settings-page.php:68
+msgid "Hide when editing post"
+msgstr ""
+
+#: sfce-settings-page.php:89
+msgid "Disable Create Facebook Events panel when editing posts?"
+msgstr ""
+
+#: sfce-settings-page.php:92
+msgid ""
+"If you call sfce_create_events() directly from your site's PHP you can tick "
+"this box to deactivate the Create Facebook Events panel in the Wordpress "
+"post editor."
+msgstr ""
+
+#: sfce-settings-page.php:98
+msgid "Click here to deactivate Create Facebook Event post editor panel"
+msgstr ""
+
+#: sfce-settings-page.php:102
+msgid "Show link to The Hypervisor?"
+msgstr ""
+
+#: sfce-settings-page.php:105
+msgid "If you like this plugin I'd be grateful if you leave a link to "
+msgstr ""
+
+#: sfce-settings-page.php:107
+msgid ""
+" at the bottom of your event description. If you don't want this link tick "
+"this box and it won't be added."
+msgstr ""
+
+#: sfce-settings-page.php:113
+msgid "Click here to hide link to The Hypervisor in your events"
+msgstr ""
+
+#: sfce-settings-page.php:117
+msgid "Submit!"
+msgstr ""
+
+#: sfce-settings-page.php:119
+msgid "Like this plugin?"
+msgstr ""
+
+#: sfce-settings-page.php:120
+msgid "Please visit my website "
+msgstr ""
+
+#: sfce-settings-page.php:123
+msgid "Or buy me a beer"
+msgstr ""
+
+#: sfce-settings-page.php:128
+msgid "The safer, easier way to pay online"
+msgstr ""
+
+#: sfce_create_event_post.php:63
+msgid "Create Facebook Event"
+msgstr ""
+
+#: sfce_create_event_post.php:64
+msgid "Event details"
+msgstr ""
+
+#: sfce_create_event_post.php:65
+msgid ""
+"Insert text; [TITLE] for post title; [[name_of_custom_field]] for data from "
+"Custom field."
+msgstr ""
+
+#: sfce_create_event_post.php:102
+msgid "required"
+msgstr ""
+
+#: sfce_create_event_post.php:111
+msgid "Event date"
+msgstr ""
+
+#: sfce_create_event_post.php:147
+msgid "Create Public Facebook Event"
+msgstr ""
+
+#: sfce_create_event_post.php:154
+msgid ""
+"Tick this box to create a Facebook event the next time this post is updated. "
+"Your Wordpress Blog and Facebook accounts must be linked to use this feature."
+msgstr ""
+
+#: sfce_create_event_post.php:161
+msgid "Facebook event for this post."
+msgstr ""
+
+#: sfce_create_event_post.php:166
+msgid ""
+"After using this option go to your Facebook Page and invite your friends to "
+"this event."
+msgstr ""
+
+#: sfce_create_event_post.php:168
+msgid ""
+"Note: It takes about 10 seconds to create a Facebook event, don't navigate "
+"away from this page until the update has completed."
+msgstr ""
+
+#: sfce_create_event_post.php:172
+msgid "Settings Page"
+msgstr ""
+
+#: sfce_create_event_post.php:197
+msgid ""
+"You cannot create an event in the past. Please pick a future date for your "
+"event. You post has been saved but no event created. Press the browser's "
+"back button to go back and edit your post"
+msgstr ""
+
+#: sfce_create_event_post.php:201
+msgid "You must enter a value for %s"
+msgstr ""
+
+#: sfce_create_event_post.php:203
+msgid "Press your browser's Back button and try again."
+msgstr ""
+
+#: sfce-create-event.php:49
+msgid ""
+"You must pass the correct arguments as an array to sfce_create_event when "
+"you invoke the function. See plugin readme for more details."
+msgstr ""
+
+#: sfce-create-event.php:69
+msgid ""
+"You should have seen a new Facebook window asking if you \"Allow Events from "
+"[your Facebook page]\". This tells Facebook it's OK for you to create events "
+"on your page. You should grant permission, then return here, press your "
+"browser back button and try again."
+msgstr ""
+
+#: sfce-create-event.php:93
+msgid ""
+"You must be an administrator of your Facebook page in order to create "
+"events. Please ask an existing Facebook page admin to fix this for you. "
+"Other details have been saved, press your browser \"Back\" button and carry "
+"on!"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "SFCe - Create Event"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "http://www.thehypervisor.com/simple-facebook-connect-extensions"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Adds a PHP function to create a Facebook event. Requires Simple Facebook "
+"Connect plugin by Otto."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Roger Howorth"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://www.thehypervisor.com"
+msgstr ""

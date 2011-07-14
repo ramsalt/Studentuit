@@ -1,0 +1,14 @@
+; $Id: og_access_roles.info,v 1.1 2009/12/31 01:00:20 marcp Exp $
+name = "OG Access Roles"
+description = "Access group posts based on user roles."
+dependencies[] = og
+dependencies[] = og_access
+package = "Organic groups"
+core = 6.x
+
+; Information added by drupal.org packaging script on 2010-01-18
+version = "6.x-1.0"
+core = "6.x"
+project = "og_access_roles"
+datestamp = "1263777905"
+
