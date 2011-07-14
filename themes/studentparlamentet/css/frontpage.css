@@ -59,3 +59,9 @@
 .nivo-directionNav a.nivo-nextNav {
   background: url(../images/demo/nivoNext.png) center center no-repeat;
 }
+#block-menu-menu-nyttige-lenker li.leaf{
+	list-style-image: url("../images/menu-leaf.png");
+	list-style-type: square;
+    margin: 4px 0;
+    padding: 0;
+}
