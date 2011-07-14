@@ -72,7 +72,6 @@
 }
 
 #block-views-Kalender-block_1 .views-field-title {
-  float: left;
 }
 
 #block-views-Kalender-block_1 .views-field-field-date-value {
@@ -82,5 +81,5 @@
 
 #block-views-Kalender-block_1 .views-field-body {
   color: gray;
-  margin-top: 20px;
+  margin: 0;
 }
