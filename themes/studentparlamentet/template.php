@@ -12,7 +12,9 @@ function studentparlamentet_preprocess_node(&$vars) {
 function studentparlamentet_preprocess_page(&$vars, $hook) {
   // Currently logged in user 
   global $user;
-  
+if(arg(0)=='user'){
+	$vars['title'] = t('Login');  
+}
 /*
   if($user && $user->uid > 0) {
     $userlinks = array();
