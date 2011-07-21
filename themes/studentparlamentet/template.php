@@ -15,8 +15,9 @@ function studentparlamentet_preprocess_page(&$vars, $hook) {
 if(arg(0)=='user'){
 	$vars['title'] = t('Login');  
 }
-  $space = spaces_get_space();
-  
+  if(function_exists('spaces_get_space')){
+    $space = spaces_get_space();
+  }
   if ( $space ) {
     if( $space->type == 'og' ) {
       // If we are in OG use template for page customized for OG
