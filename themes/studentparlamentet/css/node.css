@@ -92,3 +92,100 @@ p {
 .meta ul li:last-child {
   border: none;
 }
+
+.spaces-navigation {
+  position:absolute;
+  left:20px;
+  top:10px;
+  white-space:nowrap;
+  text-align: left;
+  font-weight: normal;
+  font-size: 1em;
+  text-transform: none;
+}
+
+.spaces-navigation .spaces-navigation-item {
+  float:left;
+  background-color: #000;
+  background-color: rgba(0,0,0, .8);
+  -moz-border-radius:5px;
+  -webkit-border-radius:5px;
+  border-radius:5px;
+}
+
+.spaces-navigation .spaces-navigation-item.open {
+  -moz-border-radius-bottomright:0;
+  -moz-border-radius-bottomleft:0;
+  -webkit-border-bottom-left-radius:0;
+  -webkit-border-bottom-right-radius:0;
+  border-bottom-left-radius:0;
+  border-bottom-right-radius:0;
+}
+
+.spaces-navigation .spaces-navigation-item a {
+  text-decoration:none;
+}
+
+.spaces-navigation .spaces-navigation-item a.spaces-admin {
+  width:35px;
+  height:23px;
+  display:block;
+  background: url('../images/settings3.png') 5px 3px no-repeat;
+  opacity:.9;
+}
+
+.spaces-navigation .spaces-navigation-item a:hover.spaces-admin {
+  opacity:1;
+}
+
+.spaces-navigation .spaces-navigation-item a.spaces-admin div {
+  color:#fff;
+  padding:4px 16px 4px 8px;
+  font-size:.8em;
+  background: url('../images/arrow-down3.png') center right no-repeat;
+  text-indent:-3000px;
+}
+
+.spaces-navigation .spaces-navigation-item-sub {
+  display:none;
+  position:absolute;
+  left:0;
+  top:22px;
+  background-color:#000;
+  background-color: rgba(0,0,0, .8);
+  width:150px;
+  font-size:1em;
+  -moz-border-radius:5px;
+  -webkit-border-radius:5px;
+  border-radius:5px;
+  -moz-border-radius-topleft:0;
+  -webkit-border-top-left-radius:0;
+  border-top-left-radius:0;
+}
+
+.spaces-navigation .spaces-navigation-item-sub.open {
+  display:block;
+  z-index:500;
+}
+
+.spaces-navigation .spaces-navigation-item-sub ul {
+  margin:0;
+  padding:5px;
+  list-style:none;
+}
+
+.spaces-navigation .spaces-navigation-item-sub ul li {
+  margin: 0;
+}
+
+.spaces-navigation .spaces-navigation-item-sub ul li a {
+  text-decoration:none;
+  display:block;
+  padding:2px 5px;
+  color:#fff;
+}
+
+.spaces-navigation .spaces-navigation-item-sub ul li a:hover {
+  background-color:#fff;
+  background-color:rgba(255,255,255,.1);
+}
