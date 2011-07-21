@@ -15,9 +15,9 @@ function studentparlamentet_preprocess_page(&$vars, $hook) {
 if(arg(0)=='user'){
 	$vars['title'] = t('Login');  
 }
-  if(function_exists('spaces_get_space')){
+  //if(function_exists('spaces_get_space')){
     $space = spaces_get_space();
-  }
+  
   if ( $space ) {
     // If we are in space, prepare and send space related variables to template
     $vars['spacetype'] = $space->type;
