@@ -703,6 +703,9 @@ function theme_yr_verdata_symbol($vars) {
   $vars['period'] .= ''; // Convert the object to a string for the next comparison.
   if ($nsym === TRUE) $symbol .= ($vars['period'] === '0') ? 'n' : 'd';
   $url = variable_get('yr_verdata_symbol_url', 'http://symbol.yr.no/grafikk/sym/b38/') . $symbol . '.png';
+  if(!$vars['name']){
+    $vars['name']='symbol';
+  }
   return theme('image', $url, $vars['name'], $vars['name'], NULL, FALSE);
 }
 
