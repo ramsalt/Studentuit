@@ -19,6 +19,10 @@ if(arg(0)=='user'){
     $space = spaces_get_space();
   }
   if ( $space ) {
+    // If we are in space, prepare and send space related variables to template
+    $vars['spacetype'] = $space->type;
+    $vars['spacetitle'] = l($space->group->title, '<front>');
+    
     if( $space->type == 'og' ) {
       // If we are in OG use template for page customized for OG
       $vars['template_files'] = array('og-page');
@@ -104,13 +108,7 @@ if(arg(0)=='user'){
   }
   */ 
 
-  // Get reference to current space
-  $space = spaces_get_space();  
-  // If we are in space, prepare and send space related variables to template
-  if ($space) { 
-    $vars['spacetype'] = $space->type;
-    $vars['spacetitle'] = l($space->group->title, '<front>');
-  }
+
   
   
   
