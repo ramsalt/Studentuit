@@ -144,7 +144,9 @@
           <?php print theme('links', $primary_links, array('class' => 'links tools')); ?>
           </div>
           <?php if (!empty($space_settings_flyout)) : ?>
+            <div id="spaces-navigation-admin-sub" class="spaces-navigation-item-sub">
             <?php print $space_settings_flyout; ?>
+            </div>
           <?php endif; ?>
           <div class="clear"></div>
 
