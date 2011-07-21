@@ -15,6 +15,48 @@ function studentparlamentet_preprocess_page(&$vars, $hook) {
 if(arg(0)=='user'){
 	$vars['title'] = t('Login');  
 }
+  $space = spaces_get_space();
+  
+  if ( $space ) {
+    if( $space->type == 'og' ) {
+      // If we are in OG use template for page customized for OG
+      $vars['template_files'] = array('og-page');
+      
+      // Get 
+      $sql = 'SELECT uid
+              FROM {og_uid}
+              WHERE is_admin = 1 AND nid = %d AND uid = %d';
+      
+      $result = db_result(db_query($sql, $space->id, $user->uid));
+      
+      // Result is true if current user is admin for this group, superadmin or administrator
+      if ($result || $user->uid == 1 || array_key_exists(6, $user->roles) ) { 
+        
+        // $vars['space_settings'] kan fjernes etter oppgradering
+        // se litt mer på styles her
+        $vars['space_settings'] = '<ul class="links admin-links"><li class="space-settings first">' . l("Administrer", "node/" . $space->id . "/edit") . '</li></ul>';
+        $space_settings_links[] = l("Edit group", "node/" . $space->id . "/edit");
+        $space_settings_links[] = l("Group features", "node/" . $space->id . "/features");
+        $space_settings_links[] = l("Members", $space->group->purl . "/og/users/" . $space->id);
+        $space_settings_links[] = l("Add members", $space->group->purl . "/og/users/" . $space->id . "/add_user");
+        $space_settings_links[] = '<a href="' . base_path() . 'grupper">' . t('Show all groups') . '</a>'; //l("Show all groups", "/" . base_path() . "grupper");
+      }
+    }
+    
+    foreach($space_settings_links as $link) {
+      $_links .= '<li>' . $link . '</li>';
+    }
+    
+    if( $_links ) {
+      $_links = '<ul>' . $_links . '</ul>';
+    }
+    else {
+      $_links = FALSE;
+    }
+    
+    
+    $vars['space_settings_flyout'] = $_links;
+  }
 /*
   if($user && $user->uid > 0) {
     $userlinks = array();
