@@ -321,7 +321,7 @@ function yr_verdata_block($op = 'list', $delta = 0, $edit = array()) {
           $l = $delta - 1;
           // Check the cache.
           $cache_id = 'yr_verdata_block_' . $l;
-          if ($cache = cache_get($cache_id, 'cache') && $cache->expire > time()) {
+          if ($cache = cache_get($cache_id, 'cache') && is_object($cache) && $cache->expire > time()) {
             $block['content'] = $cache->data;
           }
           else {
