@@ -9,6 +9,7 @@
 $(document).ready(function(){
   $('.views-admin-links').viewslinks();
   
+  /*
   $('#fpslider').nivoSlider({
     effect: 'random',
     prevText: 'Forrige',
@@ -16,5 +17,6 @@ $(document).ready(function(){
     controlNav: false,
     pauseTime: 5000,
   });
+  */
   
 });
