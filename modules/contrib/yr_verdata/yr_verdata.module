@@ -322,7 +322,7 @@ function yr_verdata_block($op = 'list', $delta = 0, $edit = array()) {
           // Check the cache.
           $cache_id = 'yr_verdata_block_' . $l;
           if ($cache = cache_get($cache_id, 'cache') && is_object($cache) && $cache->expire > time()) {
-            $block['content'] = $cache->data;
+            $block = $cache->data;
           }
           else {
             // Load the location.
@@ -332,6 +332,7 @@ function yr_verdata_block($op = 'list', $delta = 0, $edit = array()) {
               $name = yr_verdata_resolve_name($location); // Unclean, but cleaned by l().
               $block['subject'] = l(t('Forecast for !location', array('!location' => $name)), 'forecast/' . $location->yid);
               $block['content'] = yr_verdata_generate($location, 'block') . yr_verdata_credit_link($location->url, TRUE);
+              $output=$block;
               // Set the cache for the block we just generated.
               $maxage = variable_get('yr_verdata_maxage', 21600);
               cache_set($cache_id, $output, 'cache', time() + $maxage);
