@@ -24,6 +24,12 @@ function stud_vbo_add_to_group(&$user, $context) {
         //drupal_set_message('remove to: '.$user->uid.' '.$user->name.' '.$context['faculty'].' '.$context['action']);
     }
 }
+function stud_vbo_add_to_group_submit($form, &$form_state) {
+    return array(
+        'faculty' => $form_state['values']['group'],
+        'action' =>$form_state['values']['action'],
+  );
+}
 function stud_vbo_add_to_group_form($context) {
     
     $form=array();
