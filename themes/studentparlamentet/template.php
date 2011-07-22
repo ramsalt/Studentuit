@@ -39,11 +39,11 @@ if(arg(0)=='user'){
         
         // $vars['space_settings'] kan fjernes etter oppgradering
         // se litt mer på styles her
-        $vars['space_settings'] = '<ul class="links admin-links"><li class="space-settings first">' . l("Administrer", "node/" . $space->id . "/edit") . '</li></ul>';
-        $space_settings_links[] = l("Edit group", "node/" . $space->id . "/edit");
-        $space_settings_links[] = l("Group features", "node/" . $space->id . "/features");
-        $space_settings_links[] = l("Members", $space->group->purl . "/og/users/" . $space->id);
-        $space_settings_links[] = l("Add members", $space->group->purl . "/og/users/" . $space->id . "/add_user");
+        $vars['space_settings'] = '<ul class="links admin-links"><li class="space-settings first">' . l(t("Administrer"), "node/" . $space->id . "/edit") . '</li></ul>';
+        $space_settings_links[] = l(t("Edit group"), "node/" . $space->id . "/edit");
+        $space_settings_links[] = l(t("Group features"), "node/" . $space->id . "/features");
+        $space_settings_links[] = l(t("Members"), $space->group->purl . "/og/users/" . $space->id);
+        $space_settings_links[] = l(t("Add members"), $space->group->purl . "/og/users/" . $space->id . "/add_user");
         $space_settings_links[] = '<a href="' . base_path() . 'grupper">' . t('Show all groups') . '</a>'; //l("Show all groups", "/" . base_path() . "grupper");
         drupal_add_js(drupal_get_path('theme','studentparlamentet').'/javascript/banner_menu.js');
       }
