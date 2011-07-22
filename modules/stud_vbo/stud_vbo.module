@@ -17,7 +17,7 @@ function stud_vbo_action_info() {
 function stud_vbo_add_to_group(&$user, $context) {
     if($context['action']=='add'){
         og_save_subscription($context['group'], $user->uid, array('is_active' => 1));
-        drupal_set_message('add to: '.$user->uid.' '.$user->name.' '.$context['faculty'].' '.$context['action']);
+        drupal_set_message('add to: '.$user->uid.' '.$user->name.' '.$context['group'].' '.$context['action']);
         
     }elseif($context['action']=='remove'){
         og_delete_subscription($context['group'], $user->uid);
@@ -26,7 +26,7 @@ function stud_vbo_add_to_group(&$user, $context) {
 }
 function stud_vbo_add_to_group_submit($form, &$form_state) {
     return array(
-        'faculty' => $form_state['values']['group'],
+        'group' => $form_state['values']['group'],
         'action' =>$form_state['values']['action'],
   );
 }
