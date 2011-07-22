@@ -35,6 +35,6 @@ function gruppe_forside_block($op = 'list', $delta = 0, $edit = array()) {
     } else {
       $content = '';
     }
-  return array('subject'=>'<none>', 'content'=>$content);
+  return array('subject'=>'Velkommen', 'content'=>$content);
   }  
 }
