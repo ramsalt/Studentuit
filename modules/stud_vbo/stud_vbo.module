@@ -62,7 +62,7 @@ function stud_vbo_add_to_group_validate($form, &$form_state) {
 }
 function _all_groups(){
     $items=array();
-    $query=db_query('SELECT node.nid, og.og_description as title FROM node LEFT JOIN og ON og.nid=node.nid WHERE type ="gruppe" AND status LIKE 1  ORDER BY og.og_description ASC');
+    $query=db_query('SELECT node.nid, node.title as title FROM node LEFT JOIN og ON og.nid=node.nid WHERE type ="gruppe" AND status LIKE 1  ORDER BY node.title ASC');
     while($result=db_fetch_object($query)){
         $items[$result->nid]=$result->title;
     }
