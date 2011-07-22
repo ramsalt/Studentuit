@@ -75,7 +75,7 @@ if(arg(0)=='user'){
 function _make_banner_links($space = NULL){
   global $user;
   if ($user->uid == 1 || array_key_exists(4, $user->roles) || array_key_exists(3, $user->roles) ) {
-    $space_settings_links[] = l(t('Add group', 'node/add/gruppe'));
+    $space_settings_links[] = l(t('Add group'), 'node/add/gruppe');
   }
     if( $space->type == 'og' ) {
       // If we are in OG use template for page customized for OG
