@@ -35,7 +35,7 @@ if(arg(0)=='user'){
       $result = db_result(db_query($sql, $space->id, $user->uid));
       
       // Result is true if current user is admin for this group, superadmin or administrator
-      if ($result || $user->uid == 1 || array_key_exists(6, $user->roles) ) { 
+      if ($result || $user->uid == 1 || array_key_exists(4, $user->roles) || array_key_exists(3, $user->roles) ) { 
         
         // $vars['space_settings'] kan fjernes etter oppgradering
         // se litt mer på styles her
