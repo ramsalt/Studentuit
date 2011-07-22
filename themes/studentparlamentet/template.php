@@ -73,6 +73,7 @@ if(arg(0)=='user'){
 
 }
 function _make_banner_links($space = NULL){
+  global $user;
     if( $space->type == 'og' ) {
       // If we are in OG use template for page customized for OG
       $vars['template_files'] = array('og-page');
