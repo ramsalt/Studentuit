@@ -16,8 +16,13 @@ function stud_vbo_action_info() {
 
 function stud_vbo_add_to_group(&$user, $context) {
     if($context['action']=='add'){
-        og_save_subscription($context['group'], $user->uid, array('is_active' => 1));
-        drupal_set_message('add to: '.$user->uid.' '.$user->name.' '.$context['group'].' '.$context['action']);
+      if($context['role'] == 1){
+        $arguments=array('is_active' => 1, 'is_admin' => 1);
+      }else{
+         $arguments=array('is_active' => 1);
+      }
+        og_save_subscription($context['group'], $user->uid, $arguments);
+      //  drupal_set_message('add to: '.$user->uid.' '.$user->name.' '.$context['group'].' '.$context['action']);
         
     }elseif($context['action']=='remove'){
         og_delete_subscription($context['group'], $user->uid);
@@ -28,6 +33,7 @@ function stud_vbo_add_to_group_submit($form, &$form_state) {
     return array(
         'group' => $form_state['values']['group'],
         'action' =>$form_state['values']['action'],
+        'role' =>$form_state['values']['role'],
   );
 }
 function stud_vbo_add_to_group_form($context) {
@@ -51,6 +57,14 @@ function stud_vbo_add_to_group_form($context) {
         '#title' => t('Choose action'),
         '#default_value' => 'add',
         '#options' => array('remove'=>t('Remove from group'),'add' => t('Add to group')),
+        '#size' => 5
+    );
+    $form['role'] = array(
+        '#type' => 'radios',
+        '#multiple' => FALSE,
+        '#title' => t('Choose a role'),
+        '#default_value' => 0,
+        '#options' => array(0=>t('Member'),1 => t('Admin')),
         '#size' => 5
     );
     return $form;
