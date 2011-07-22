@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * Implementation of hook_action_info().
+ */
+
+function stud_vbo_action_info() {
+  return array(
+    'stud_vbo_add_to_group' => array(
+      'description' => t('Add to group'),
+      'type' => 'user',
+      'configurable' => TRUE,
+    ),
+  );
+}
+
+function stud_vbo_add_to_group(&$user, $context) {
+    if($context['action']=='add'){
+        og_save_subscription($context['group'], $user->uid, array('is_active' => 1));
+        //drupal_set_message('add to: '.$user->uid.' '.$user->name.' '.$context['faculty'].' '.$context['action']);
+        
+    }elseif($context['action']=='remove'){
+        og_delete_subscription($context['group'], $user->uid);
+        //drupal_set_message('remove to: '.$user->uid.' '.$user->name.' '.$context['faculty'].' '.$context['action']);
+    }
+}
+function stud_vbo_add_to_group_form($context) {
+    
+    $form=array();
+    
+    $form['group'] = array(
+        '#type' => 'select',
+        '#multiple' => FALSE,
+        '#title' => t('Groups'),
+        '#description' => t('Choose one group to add/remove the selected users.'),
+        '#options' => _all_groups(),
+        '#size' => 6,
+        '#attributes'=>array(
+            'style' => 'width: 100px; height: 110px;'
+        )
+    );
+    $form['action'] = array(
+        '#type' => 'radios',
+        '#multiple' => FALSE,
+        '#title' => t('Choose action'),
+        '#default_value' => 'add',
+        '#options' => array('remove'=>t('Remove from group'),'add' => t('Add to group')),
+        '#size' => 5
+    );
+    return $form;
+}
+
+function stud_vbo_add_to_group_validate($form, &$form_state) {
+
+    if(!is_numeric($form_state['values']['group'])){
+        form_set_error('faculty', t('Choose a group'));
+    }
+    if(!isset($form_state['values']['action'])){
+        form_set_error('action', t('Choose a form of action'));
+    }
+
+}
+function _all_groups(){
+    $items=array();
+    $query=db_query('SELECT node.nid, og.og_description as title FROM node LEFT JOIN og ON og.nid=node.nid WHERE type ="gruppe" AND status LIKE 1  ORDER BY og.og_description ASC');
+    while($result=db_fetch_object($query)){
+        $items[$result->nid]=$result->title;
+    }
+    return $items;
+}
