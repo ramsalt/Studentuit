@@ -16,5 +16,5 @@ function sp_forside_menu() {
 }
 
 function sp_forside_hello() {
-  return "(kan embedde view her)";
+  return " ";
 }
