@@ -7,7 +7,7 @@
 function stud_vbo_action_info() {
   return array(
     'stud_vbo_add_to_group' => array(
-      'description' => t('Add to group'),
+      'description' => t('Add/remove to/from group'),
       'type' => 'user',
       'configurable' => TRUE,
     ),
