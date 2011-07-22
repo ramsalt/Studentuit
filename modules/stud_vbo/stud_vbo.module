@@ -16,7 +16,7 @@ function stud_vbo_action_info() {
 
 function stud_vbo_add_to_group(&$user, $context) {
     if($context['action']=='add'){
-      if($role == 1){
+      if($context['role'] == 1){
         $arguments=array('is_active' => 1, 'is_admin' => 1);
       }else{
          $arguments=array('is_active' => 1);
