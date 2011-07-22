@@ -101,7 +101,7 @@ function _make_banner_links($space = NULL){
         $space_settings_links[] = '<a href="' . base_path() . 'grupper">' . t('Show all groups') . '</a>'; //l("Show all groups", "/" . base_path() . "grupper");
         $space_settings_links[] = l(t("All groups"), "user/".$user->uid."/edit/groups");
     
-        drupal_add_js(drupal_get_path('theme','studentparlamentet').'/javascript/banner_menu.js');
+        
       }
     }
 
@@ -111,6 +111,7 @@ function _make_banner_links($space = NULL){
     
     if( $_links ) {
       $_links = '<ul>' . $_links . '</ul>';
+      drupal_add_js(drupal_get_path('theme','studentparlamentet').'/javascript/banner_menu.js');
     }
     else {
       $_links = FALSE;
