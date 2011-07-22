@@ -143,6 +143,12 @@
     
           <?php print theme('links', $primary_links, array('class' => 'links tools')); ?>
           </div>
+
+          <div class="clear"></div>
+
+          <?php else:?>
+            <span class="slogan">Din guide til studenthverdagen!</span>          
+          <?php endif; ?>
           <?php if (!empty($space_settings_flyout)) : ?>
             <div class="spaces-navigation">
               <div class="spaces-navigation-item" id="spaces-navigation-admin">
@@ -153,12 +159,6 @@
               </div>
             </div>
           <?php endif; ?>
-          <div class="clear"></div>
-
-          <?php else:?>
-            <span class="slogan">Din guide til studenthverdagen!</span>          
-          <?php endif; ?>
-          
           
           <div class="logo">
 
