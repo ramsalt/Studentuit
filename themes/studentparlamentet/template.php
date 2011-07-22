@@ -45,7 +45,7 @@ if(arg(0)=='user'){
         $space_settings_links[] = l(t("Members"), $space->group->purl . "/og/users/" . $space->id);
         $space_settings_links[] = l(t("Add members"), $space->group->purl . "/og/users/" . $space->id . "/add_user");
         $space_settings_links[] = '<a href="' . base_path() . 'grupper">' . t('Show all groups') . '</a>'; //l("Show all groups", "/" . base_path() . "grupper");
-        $space_settings_links[] = l(t("All groups"), "user/".$user->uid.""/edit/groups");
+        $space_settings_links[] = l(t("All groups"), "user/".$user->uid."/edit/groups");
     
         drupal_add_js(drupal_get_path('theme','studentparlamentet').'/javascript/banner_menu.js');
       }
