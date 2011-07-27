@@ -23,137 +23,12 @@ if(arg(0)=='user'){
     $vars['spacetype'] = $space->type;
     $vars['spacetitle'] = l($space->group->title, '<front>');
     
-    if( $space->type == 'og' ) {
-      // If we are in OG use template for page customized for OG
-      $vars['template_files'] = array('og-page');
-      
-      // Get 
-      $sql = 'SELECT uid
-              FROM {og_uid}
-              WHERE is_admin = 1 AND nid = %d AND uid = %d';
-      
-      $result = db_result(db_query($sql, $space->id, $user->uid));
-      
-      // Result is true if current user is admin for this group, superadmin or administrator
-      if ($result || $user->uid == 1 || array_key_exists(4, $user->roles) || array_key_exists(3, $user->roles) ) { 
-        
-        // $vars['space_settings'] kan fjernes etter oppgradering
-        // se litt mer på styles her
-        $vars['space_settings'] = '<ul class="links admin-links"><li class="space-settings first">' . l(t("Administrer"), "node/" . $space->id . "/edit") . '</li></ul>';
-        $space_settings_links[] = l(t("Edit group"), "node/" . $space->id . "/edit");
-        $space_settings_links[] = l(t("Group features"), "node/" . $space->id . "/features");
-        $space_settings_links[] = l(t("Members"), $space->group->purl . "/og/users/" . $space->id);
-        $space_settings_links[] = l(t("Add members"), $space->group->purl . "/og/users/" . $space->id . "/add_user");
-        $space_settings_links[] = '<a href="' . base_path() . 'grupper">' . t('Show all groups') . '</a>'; //l("Show all groups", "/" . base_path() . "grupper");
-        $space_settings_links[] = l(t("All groups"), "user/".$user->uid."/edit/groups");
-    
-        drupal_add_js(drupal_get_path('theme','studentparlamentet').'/javascript/banner_menu.js');
-      }
-    }
-    
-    foreach($space_settings_links as $link) {
-      $_links .= '<li>' . $link . '</li>';
-    }
-    
-    if( $_links ) {
-      $_links = '<ul>' . $_links . '</ul>';
-    }
-    else {
-      $_links = FALSE;
-    }
-    
-    
-    $vars['space_settings_flyout'] = $_links;
   }
-/*
-  if($user && $user->uid > 0) {
-    $userlinks = array();
-    
-    $userlinks['username'] = array(
-      'title' => t('Welcome,') . ' ' . $user->name,
-      'href' => 'user/' . $user->uid,
-    );
-    
-    $userlinks['usermessages'] = array(
-      'title' => '(12)',
-      'href' => 'user/messages',
-      'attributes' => array(
-        'class' => 'messages',
-      ),
-    );
-    
-    $userlinks['userlogout'] = array(
-      'title' => t('Logout'),
-      'href' => 'logout',
-    );
-    
-    
-    $vars['usermenu'] = theme('links', $userlinks);
+  $banner=_make_banner_links($space);
+  if($banner){
+    $vars['space_settings_flyout'] = $banner;
   }
-  else {
-    
-    $userlinks['loginmessage'] = array(
-      'title' => 'Du er ikke logget inn',
-    );
-    
-    $userlinks['userlogin'] = array(
-      'title' => 'Logg inn',
-      'href' => 'user/login',
-    );
-    
-    $userlinks['userregister'] = array(
-      'title' => 'Registrer konto',
-      'href' => 'user/register',
-    );
-    
-    $vars['usermenu'] = theme('links', $userlinks);
-  }
-  */ 
 
-
-  
-  
-  
-  /**
-   * I følgende situasjoner, legg til "Opprett ny <content type>" hvis bruker er
-   * på en node eller utlisting av en feature ala. blogg, kalender etc.
-   */
-  
-  /*
-  $urls = array(
-    'blogg' => 'blog',
-    'kalender' =>  'activity',
-    'nyheter' => 'news',
-  ); 
-  
-  $arg = arg();
-  
-  
-  if (count($arg) == 1 && array_key_exists($arg[0], $urls)) {
-    $_node_type = $urls[$arg[0]];
-  }
-  
-  
-  if( count($arg) >= 2 && $arg[0] == 'node' && (int)$arg[1] ) {
-    $_node = node_load($arg[1]);
-    $_node_type = $_node->type;    
-  }
-  
-  if ($_node_type) {
-    
-    $types_names = node_get_types('names');
-    $excluded_content_types = array('minisite', 'newsold', 'page', 'profile');
-    
-    if (node_access('create', $_node->type) || !in_array($_node->type, $excluded_content_types)) {
-      $block = new stdclass;
-      $block->delta = 'content-creation-link';
-      $block->module = 'template-preprocess-page';
-      $block->content = l('Opprett ny ' . strtolower($types_names[$_node_type]), 'node/add/' . $_node_type) . '</div>';
-      
-      $vars['right'] = theme('block', $block) . $vars['right'];
-    }
-  }
-  */ 
   // For easy printing of variables.
   $vars['logo_img']         = $vars['logo'] ? theme('image', substr($vars['logo'], strlen(base_path())), t('Home'), t('Home')) : '';
   $vars['linked_logo_img']  = $vars['logo_img'] ? l($vars['logo_img'], '<front>', array('rel' => 'home', 'title' => t('Home'), 'html' => TRUE)) : '';
@@ -195,33 +70,55 @@ if(arg(0)=='user'){
       }
     }
   }
-  // Process images array into an array of filepaths & add processed
-  // version to page template.
 
-  /*
-  foreach ($image as $name => $fid) {
-    $file = db_fetch_object(db_query('SELECT * FROM {files} f WHERE f.fid = %d', $fid));
-    if ($file && $file->filepath && file_exists($file->filepath)) {
-      $image[$name] = $file->filepath;
-      $vars[$name] = theme('designkit_image', $name, $file->filepath);
+}
+function _make_banner_links($space = NULL){
+  global $user;
+  if ($user->uid == 1 || array_key_exists(4, $user->roles) || array_key_exists(3, $user->roles) ) {
+    $space_settings_links[] = l(t('Add group'), 'node/add/gruppe');
+    $space_settings_links[] = l(t('Users'), 'brukere');
+  }
+    if( $space->type == 'og' ) {
+      // If we are in OG use template for page customized for OG
+      $vars['template_files'] = array('og-page');
+      
+      // Get 
+      $sql = 'SELECT uid
+              FROM {og_uid}
+              WHERE is_admin = 1 AND nid = %d AND uid = %d';
+      
+      $result = db_result(db_query($sql, $space->id, $user->uid));
+      
+      // Result is true if current user is admin for this group, superadmin or administrator
+      if ($result || $user->uid == 1 || array_key_exists(4, $user->roles) || array_key_exists(3, $user->roles) ) { 
+        
+        // $vars['space_settings'] kan fjernes etter oppgradering
+        // se litt mer på styles her
+        $vars['space_settings'] = '<ul class="links admin-links"><li class="space-settings first">' . l(t("Administrer"), "node/" . $space->id . "/edit") . '</li></ul>';
+        $space_settings_links[] = l(t("Edit group"), "node/" . $space->id . "/edit");
+        $space_settings_links[] = l(t("Group features"), "node/" . $space->id . "/features");
+        $space_settings_links[] = l(t("Members"), $space->group->purl . "/og/users/" . $space->id);
+        $space_settings_links[] = l(t("Add members"), $space->group->purl . "/og/users/" . $space->id . "/add_user");
+        $space_settings_links[] = '<a href="' . base_path() . 'grupper">' . t('Show all groups') . '</a>'; //l("Show all groups", "/" . base_path() . "grupper");
+        $space_settings_links[] = l(t("All groups"), "user/".$user->uid."/edit/groups");
+    
+        
+      }
+    }
+
+    foreach($space_settings_links as $link) {
+      $_links .= '<li>' . $link . '</li>';
+    }
+    
+    if( $_links ) {
+      $_links = '<ul>' . $_links . '</ul>';
+      drupal_add_js(drupal_get_path('theme','studentparlamentet').'/javascript/banner_menu.js');
     }
     else {
-      unset($image[$name]);
+      $_links = FALSE;
     }
-  }
-  */ 
-  // Generate CSS styles.
-  /*
-  if ($image || array_filter($color, 'designkit_valid_color')) {
-    // Add in designkit styles.
-    $vars['body_classes'] .= " designkit";
-    // Add styles.
-    $styles = theme('designkit', $color, $image);
-    // Provide in separate variable for themes that reset or blow away styles.
-    $vars['styles'] .= $styles;
-    $vars['designkit'] = $styles;
-  }
-  */ 
+    
+    
+    return $_links;
 }
-
 ?>
