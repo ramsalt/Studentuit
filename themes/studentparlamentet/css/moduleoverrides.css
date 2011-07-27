@@ -57,12 +57,16 @@
 }
 
 #block-views-grupper-block_1 {
+}
 
+#block-views-grupper-block_1 .views-row {
+  margin-bottom: 20px;
+  clear: both;
 }
 
 #block-views-grupper-block_1 .views-field-field-group-icon-fid {
   float: left;
-  margin-right: 5px;
+  margin-right: 15px;
 }
 
 #block-views-Kalender-block_1 .views-row, #block-views-Kalender-block_2 .views-row  {
