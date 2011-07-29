@@ -64,7 +64,7 @@ function _parser_ical_parse($feed_content) {
       $item['tags'] = isset($event['CATEGORIES']) ? explode(',', $event['CATEGORIES']) : array();
       $item['ical_date'] = new ParserIcalDateTimeElement($event);
       $item['ical_location'] = $event['LOCATION'];
-      $item['gid'] = array(35=>35);
+      $item['gid'] = array(132=>132);
       $parsed_source['items'][] = $item;
     }
   }
