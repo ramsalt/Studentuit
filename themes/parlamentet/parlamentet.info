@@ -1,9 +1,0 @@
-name = Parlamentet
-description = Theme for studentparlamentet
-version = VERSION
-core = 6.x
-engine = phptemplate
-
-stylesheets[all][] = css/reset.css
-
-regions[right]    = Right
