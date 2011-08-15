@@ -69,7 +69,7 @@
   margin-right: 15px;
 }
 
-#block-views-Kalender-block_1 .views-row, #block-views-Kalender-block_2 .views-row  {
+.view-id-Kalender.view-display-id-page_1 .views-row, #block-views-Kalender-block_1 .views-row, #block-views-Kalender-block_2 .views-row  {
   display: table;
   clear: both;
   margin-top: 10px;
@@ -79,7 +79,7 @@
 #block-views-Kalender-block_1 .views-field-title {
 }
 
-#block-views-Kalender-block_1 .views-field-field-date-value, #block-views-Kalender-block_2 .views-field-field-date-value {
+.view-id-Kalender.view-display-id-page_1 .views-field-field-date-value, #block-views-Kalender-block_1 .views-field-field-date-value, #block-views-Kalender-block_2 .views-field-field-date-value {
   float: left;
   margin-right: 10px;
 }
