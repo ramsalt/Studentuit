@@ -91,11 +91,12 @@
 
 .view-id-grupper.view-display-id-page_1 ul li{
 	list-style: none;
-}
-.view-id-grupper.view-display-id-page_1 .views-field-title a{
-	font-size: 22px;
 	border: 1px solid #478440;
 	border-radius: 4px;
 	-moz-border-radius: 4px;
 	padding: 4px;
+}
+.view-id-grupper.view-display-id-page_1 .views-field-title a{
+	font-size: 22px;
+
 }
