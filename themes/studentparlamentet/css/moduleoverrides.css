@@ -88,3 +88,7 @@
   color: gray;
   margin: 0;
 }
+
+.view-id-grupper.view-display-id-page_1 ul li{
+	list-style: none;
+}
