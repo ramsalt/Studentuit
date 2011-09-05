@@ -250,12 +250,32 @@ function fb_events_cron(){
       
       
       if($fb_event_nid > 0){ // update exsisting
+        $changed = FALSE;
         drupal_set_message('updating: '.$event['name']);
         $node = node_load(array('nid' => $fb_event_nid));
-        dsm($node);
-        $node->title = $fb_event['name'];
-        $node->body = $fb_event['description'];
-        dsm($fb_event);
+
+
+        if($node->title != $fb_event['name']){
+          $changed = TRUE;
+          $node->title = $fb_event['name'];
+        }
+        if($node->body != $fb_event['description']){
+          $node->body = $fb_event['description'];
+          $changed = TRUE;
+        }
+        if($node->field_date[0]['value'] != $fb_event['start_time']){
+          $node->field_date[0]['value'] = $fb_event['start_time'];
+          $changed = TRUE;
+        }
+        if($node->field_date[0]['value2'] != $fb_event['end_time']){
+          $node->field_date[0]['value2'] = $fb_event['end_time'];
+          $changed = TRUE;
+        }
+
+        if($changed){
+          dsm($node);
+          dsm($fb_event);
+        }
         
         
       }else{
