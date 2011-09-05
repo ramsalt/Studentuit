@@ -87,9 +87,9 @@
 .view-id-Kalender.view-display-id-page_1 .views-row, #block-views-Kalender-block_1 .views-row, #block-views-Kalender-block_2 .views-row  {
 /*  display: table;
   clear: both; */ 
-  margin-left: 60px;
+  margin-left: 50px;
   margin-top: 10px;
-  width: 100%;
+  width: 80%;
 }
 
 #block-views-Kalender-block_1 .views-field-title {
