@@ -241,6 +241,14 @@ function fb_events_cron(){
     $fbml=$_fb->api('/'.$result->fbid.'/events');
     drupal_set_message('ey');
     foreach($fbml['data'] as $event){
+      $query = db_query('SELECT nid FROM {fb_events_mapping} WHERE fbid LIKE %d', $event['id']);
+      $fb_event_nid = db_result($query);
+      
+      if($fb_event_nid > 0){ // update exsisting
+        drupal_set_message('updating: '.$event['name']);
+      }else{
+        drupal_set_message('new: '.$event['name']);
+      }
       watchdog('notice', $event['name'].$event['id']);
     }
     watchdog('notice', 'facebook: '.$result->name);
