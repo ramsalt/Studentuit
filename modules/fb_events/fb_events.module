@@ -96,7 +96,7 @@ function fb_events_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   
 
   if($op == 'view'){
-  
+    
   }
   elseif($op == 'delete'){
     db_query('DELETE FROM {fb_events} WHERE nid = %d', $node->nid);
@@ -237,7 +237,7 @@ function fb_events_cron(){
   global $_fb;
   $query = db_query('SELECT * FROM {fb_events}');
   while($result = db_fetch_object($query)){
-    drupal_set_message($result->name);
+   // drupal_set_message($result->name);
     
     $since = time();
     $fbml=$_fb->api('/'.$result->fbid.'/events&since='.$since);
@@ -271,8 +271,8 @@ function fb_events_cron(){
         }
         if($changed){
           node_save($node);
-          dsm($node);
-          dsm($fb_event);
+          //dsm($node);
+          //dsm($fb_event);
         }
         
         
