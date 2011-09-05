@@ -231,6 +231,11 @@ function _post_to_fb($method, $params){
   $decoded = json_decode($result, true);
   curl_close($ch);
   return $decoded;
-  
 }
 
+function fb_events_cron(){
+  $query = db_query('SELECT * FROM {fb_events}');
+  while($result = db_fetch_object($query)){
+    watchdog('notice', 'facebook: '.$result->name);
+  }
+}
