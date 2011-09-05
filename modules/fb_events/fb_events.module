@@ -239,7 +239,9 @@ function fb_events_cron(){
   while($result = db_fetch_object($query)){
     
     $fbml=$_fb->api('/'.$result->fbid.'/events');
-        
-    watchdog('notice', 'facebook: '.$result->name, $fbml);
+    foreach($fbml['data'] as $event){
+      watchdog('notice', $event['name'].$event['id']);
+    }
+    watchdog('notice', 'facebook: '.$result->name);
   }
 }
