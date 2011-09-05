@@ -239,7 +239,8 @@ function fb_events_cron(){
   while($result = db_fetch_object($query)){
     drupal_set_message($result->name);
     
-    $fbml=$_fb->api('/'.$result->fbid.'/events');
+    $since = time();
+    $fbml=$_fb->api('/'.$result->fbid.'/events&since='.$since);
     
     foreach($fbml['data'] as $event){
       $sub_query = db_query('SELECT nid FROM {fb_events_mapping} WHERE fbid LIKE %d', $event['id']);
