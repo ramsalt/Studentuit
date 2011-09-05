@@ -278,6 +278,7 @@ function fb_events_cron(){
         
       }else{ // make new event node
         $node = new StdClass();
+        $node->type = 'hendelse';
         $node->title = $fb_event['name'];
         $node->body = $fb_event['description'];
         $node->field_date[0]['value'] = $fb_event['start_time'];
