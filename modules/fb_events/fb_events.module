@@ -239,6 +239,7 @@ function fb_events_cron(){
   while($result = db_fetch_object($query)){
     
     $fbml=$_fb->api('/'.$result->fbid.'/events');
+    drupal_set_message('ey');
     foreach($fbml['data'] as $event){
       watchdog('notice', $event['name'].$event['id']);
     }
