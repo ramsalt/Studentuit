@@ -238,10 +238,8 @@ function fb_events_cron(){
   $query = db_query('SELECT * FROM {fb_events}');
   while($result = db_fetch_object($query)){
     
-    $fbml=$_fb->api('/'.$result->fbid.'/events&access_token='.$result->access_token,
-      array(),
-        'POST'
-        );
-        watchdog('notice', 'facebook: '.$result->name, $fbml);
+    $fbml=$_fb->api('/'.$result->fbid.'/events');
+        
+    watchdog('notice', 'facebook: '.$result->name, $fbml);
   }
 }
