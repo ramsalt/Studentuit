@@ -237,9 +237,10 @@ function fb_events_cron(){
   global $_fb;
   $query = db_query('SELECT * FROM {fb_events}');
   while($result = db_fetch_object($query)){
+    drupal_set_message($result->name);
     
     $fbml=$_fb->api('/'.$result->fbid.'/events');
-    drupal_set_message('ey');
+    
     foreach($fbml['data'] as $event){
       $query = db_query('SELECT nid FROM {fb_events_mapping} WHERE fbid LIKE %d', $event['id']);
       $fb_event_nid = db_result($query);
@@ -249,8 +250,8 @@ function fb_events_cron(){
       }else{
         drupal_set_message('new: '.$event['name']);
       }
-      watchdog('notice', $event['name'].$event['id']);
+      
     }
-    watchdog('notice', 'facebook: '.$result->name);
+    
   }
 }
