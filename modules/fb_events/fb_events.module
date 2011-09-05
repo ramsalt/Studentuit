@@ -270,10 +270,11 @@ function fb_events_cron(){
         if($node->field_date[0]['value2'] != $fb_event['end_time']){
           $node->field_date[0]['value2'] = $fb_event['end_time'];
           $changed = TRUE;
-          node_save($node);
+          
         }
 
         if($changed){
+          node_save($node);
           dsm($node);
           dsm($fb_event);
         }
