@@ -60,9 +60,6 @@
 <?php endif; ?>
 
   <div class="meta">
-  <?php if ($submitted): ?>
-    <span class="submitted"><?php print $submitted ?></span>
-  <?php endif; ?>
 
   <?php if ($terms): ?>
     <div class="terms terms-inline"><?php print $terms ?></div>
@@ -72,6 +69,10 @@
   <div class="content">
     <?php print $content ?>
   </div>
+
+  <?php if ($submitted): ?>
+    <span class="submitted"><?php print $submitted ?></span>
+  <?php endif; ?>
 
 
   <?php print $links; ?>
