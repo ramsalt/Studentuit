@@ -283,7 +283,10 @@ function fb_events_cron(){
         $node->body = $fb_event['description'];
         $node->field_date[0]['value'] = $fb_event['start_time'];
         $node->field_date[0]['value2'] = $fb_event['end_time'];
-        $node->og_groups = $result->nid;
+        $node->og_groups = array($result->nid);
+        $node->uid = 1;
+        $node->language = 'nb';
+        $node->status = 1;
         node_save($node);
         
         db_query('INSERT INTO {fb_events_mapping} (nid, fbid) VALUES (%d, %d)', $node->nid, $fb_event['id']);
