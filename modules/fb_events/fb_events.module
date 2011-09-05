@@ -247,11 +247,16 @@ function fb_events_cron(){
       $fb_event_nid = db_result($sub_query);
       
       $fb_event = $_fb->api('/'.$event['id']);
-      dsm($fb_event);
+      
       
       if($fb_event_nid > 0){ // update exsisting
         drupal_set_message('updating: '.$event['name']);
         $node = node_load(array('nid' => $fb_event_nid));
+        dsm($node);
+        $node->title = $fb_event['name'];
+        $node->body = $fb_event['description'];
+        dsm($fb_event);
+        
         
       }else{
         drupal_set_message('new: '.$event['name']);
