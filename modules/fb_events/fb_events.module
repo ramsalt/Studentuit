@@ -251,9 +251,7 @@ function fb_events_cron(){
       
       if($fb_event_nid > 0){ // update exsisting
         $changed = FALSE;
-        drupal_set_message('updating: '.$event['name']);
         $node = node_load(array('nid' => $fb_event_nid));
-
 
         if($node->title != $fb_event['name']){
           $changed = TRUE;
@@ -270,9 +268,7 @@ function fb_events_cron(){
         if($node->field_date[0]['value2'] != $fb_event['end_time']){
           $node->field_date[0]['value2'] = $fb_event['end_time'];
           $changed = TRUE;
-          
         }
-
         if($changed){
           node_save($node);
           dsm($node);
@@ -280,7 +276,15 @@ function fb_events_cron(){
         }
         
         
-      }else{
+      }else{ // make new event node
+        $node = new StdClass();
+        $node->title = $fb_event['name'];
+        $node->body = $fb_event['description'];
+        $node->field_date[0]['value'] = $fb_event['start_time'];
+        $node->field_date[0]['value2'] = $fb_event['end_time'];
+        $node->og_groups = $result->nid;
+        $saved = node_save($node);
+        dsm($saved);
         drupal_set_message('new: '.$event['name']);
       }
       
