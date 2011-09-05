@@ -96,7 +96,7 @@ function fb_events_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   
 
   if($op == 'view'){
-  
+    
   }
   elseif($op == 'delete'){
     db_query('DELETE FROM {fb_events} WHERE nid = %d', $node->nid);
@@ -231,6 +231,67 @@ function _post_to_fb($method, $params){
   $decoded = json_decode($result, true);
   curl_close($ch);
   return $decoded;
-  
 }
 
+function fb_events_cron(){
+  global $_fb;
+  $query = db_query('SELECT * FROM {fb_events}');
+  while($result = db_fetch_object($query)){
+   // drupal_set_message($result->name);
+    
+    $since = time();
+    $fbml=$_fb->api('/'.$result->fbid.'/events&since='.$since);
+    
+    foreach($fbml['data'] as $event){
+      $sub_query = db_query('SELECT nid FROM {fb_events_mapping} WHERE fbid LIKE %d', $event['id']);
+      $fb_event_nid = db_result($sub_query);
+      
+      $fb_event = $_fb->api('/'.$event['id']);
+      
+      
+      if($fb_event_nid > 0){ // update exsisting
+        $changed = FALSE;
+        $node = node_load(array('nid' => $fb_event_nid));
+
+        if($node->title != $fb_event['name']){
+          $changed = TRUE;
+          $node->title = $fb_event['name'];
+        }
+        if($node->body != $fb_event['description']){
+          $node->body = $fb_event['description'];
+          $changed = TRUE;
+        }
+        if($node->field_date[0]['value'] != $fb_event['start_time']){
+          $node->field_date[0]['value'] = $fb_event['start_time'];
+          $changed = TRUE;
+        }
+        if($node->field_date[0]['value2'] != $fb_event['end_time']){
+          $node->field_date[0]['value2'] = $fb_event['end_time'];
+          $changed = TRUE;
+        }
+        if($changed){
+          node_save($node);
+          //dsm($node);
+          //dsm($fb_event);
+        }
+        
+        
+      }else{ // make new event node
+        $node = new StdClass();
+        $node->type = 'hendelse';
+        $node->title = $fb_event['name'];
+        $node->body = $fb_event['description'];
+        $node->field_date[0]['value'] = $fb_event['start_time'];
+        $node->field_date[0]['value2'] = $fb_event['end_time'];
+        $node->og_groups = $result->nid;
+        node_save($node);
+        
+        db_query('INSERT INTO {fb_events_mapping} (nid, fbid) VALUES (%d, %d)', $node->nid, $fb_event['id']);
+        
+        drupal_set_message('new: '.$event['name']);
+      }
+      
+    }
+    
+  }
+}
