@@ -75,6 +75,15 @@
   clear: both;
 }
 
+.view-id-Kalender .item-list {
+  clear: both;
+}
+
+.view-id-Kalender .item-list ul li {
+  list-style-type: none;
+}
+
+
 .view-id-Kalender.view-display-id-page_1 .views-row, #block-views-Kalender-block_1 .views-row, #block-views-Kalender-block_2 .views-row  {
 /*  display: table;
   clear: both; */ 
