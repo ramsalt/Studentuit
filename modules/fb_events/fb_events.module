@@ -234,8 +234,14 @@ function _post_to_fb($method, $params){
 }
 
 function fb_events_cron(){
+  global $_fb;
   $query = db_query('SELECT * FROM {fb_events}');
   while($result = db_fetch_object($query)){
-    watchdog('notice', 'facebook: '.$result->name);
+    
+    $fbml=$_fb->api('/'.$result->fbid.'/events&access_token='.$result->access_token,
+      array(),
+        'POST'
+        );
+        watchdog('notice', 'facebook: '.$result->name, $fbml);
   }
 }
