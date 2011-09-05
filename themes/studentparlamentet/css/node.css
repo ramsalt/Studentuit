@@ -68,6 +68,12 @@ p {
 */ 
 
 /** META STYLES **/
+
+span.submitted {
+  color: gray;
+  margin-top: 10px;
+}
+
 .meta ul {
   margin:0;
   padding:0;
