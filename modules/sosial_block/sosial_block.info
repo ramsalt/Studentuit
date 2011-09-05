@@ -1,0 +1,9 @@
+name = Sosial block
+description = Show sosial blocks
+php = 5
+core = 6.x
+
+version = "6.x-1.x"
+core = "6.x"
+project = "Other"
+

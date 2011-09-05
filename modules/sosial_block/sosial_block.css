@@ -1,0 +1,22 @@
+#block-next_bus-1 table tr:First-Child td:First-Child, #block-next_bus-1 table tr td {
+    background: none;
+    vertical-align: baseline;
+    border: none;
+    padding: 0px;   
+}
+
+#block-next_bus-1 table tr td:nth-child(2n+2) {
+    font-size: 140%;
+    font-weight: bold;
+}
+
+#block-next_bus-1 table tr td:nth-child(2n+3) {
+    font-size: 100%;
+    font-weight: normal;
+}
+
+#block-next_bus-1 table tr td:nth-child(2n+4) {
+    font-size: 100%;
+    font-weight: normal;
+    color: gray;
+}

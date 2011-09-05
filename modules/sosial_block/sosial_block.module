@@ -1,0 +1,90 @@
+<?php
+
+function sosial_block_block($op = 'list', $delta = 0, $edit = array()) {
+  if ($op == 'list') {
+    $blocks[1] = array(
+      'info' => t('Stud: Facebook like block'), 
+      'cache' => BLOCK_NO_CACHE,
+    );
+    $blocks[2] = array(
+      'info' => t('Stud: Twitter block'), 
+      'cache' => BLOCK_NO_CACHE,
+    );
+    return $blocks;
+  }
+  else if ($op == 'view') {
+    switch ($delta) {
+      case 1:
+        // Your module will need to define this function to render the block.
+        $block = array(
+          'subject' => t(''), 
+          'content' => _sb_facebook(),
+        );
+        break;
+      case 2:
+        // Your module will need to define this function to render the block.
+        $block = array(
+          'subject' => t(''), 
+          'content' => _sb_twitter(),
+        );
+        break;
+    }
+    return $block;
+  }
+}
+
+function _sb_facebook(){
+  $node = node_load(array('nid' => arg(1)));
+  $space = spaces_get_space();
+  if(strlen($space->group->field_fb_like_box[0]['value'])>2){
+    $html = $space->group->field_fb_like_box[0]['value']; 
+    return $html;
+  }else{
+    return '';
+  }
+}
+
+function _sb_twitter(){
+  $node = node_load(array('nid' => arg(1)));
+  $space = spaces_get_space();
+  if(strlen($space->group->field_twitter_search[0]['value'])>2){
+  $html = "
+  <script src='http://widgets.twimg.com/j/2/widget.js'></script>
+<script>
+new TWTR.Widget({
+  version: 2,
+  type: 'search',
+  search: '".$space->group->field_twitter_search[0]['value']."',
+  interval: 7000,
+  title: '".$space->group->field_twitter_title[0]['value']."',
+  subject: '".$space->group->field_twitter_subject[0]['value']."',
+  width: 'auto',
+  height: 200,
+  theme: {
+    shell: {
+      background: '#8ec1da',
+      color: '#ffffff'
+    },
+    tweets: {
+      background: '#323232',
+      color: '#FFFFFF',
+      links: '#C9DD27'
+    }
+  },
+  features: {
+    scrollbar: false,
+    loop: true,
+    live: true,
+    hashtags: true,
+    timestamp: true,
+    avatars: true,
+    toptweets: true,
+    behavior: 'default'
+  }
+}).render().start();
+</script>";
+  return $html;
+  }else{
+    return '';
+  }
+}
