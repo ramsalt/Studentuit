@@ -69,9 +69,16 @@
   margin-right: 15px;
 }
 
-.view-id-Kalender.view-display-id-page_1 .views-row, #block-views-Kalender-block_1 .views-row, #block-views-Kalender-block_2 .views-row  {
-  display: table;
+.view-id-Kalender .view-content h3 {
+  float: left;
+  font-size: 100%;
   clear: both;
+}
+
+.view-id-Kalender.view-display-id-page_1 .views-row, #block-views-Kalender-block_1 .views-row, #block-views-Kalender-block_2 .views-row  {
+/*  display: table;
+  clear: both; */ 
+  margin-left: 60px;
   margin-top: 10px;
   width: 100%;
 }
