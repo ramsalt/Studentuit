@@ -114,7 +114,7 @@ function scribdfield_widget_process($element, $edit, &$form_state, $form) {
   }
 
   $element['public'] = array(
-    '#type' => 'checkbox',
+    '#type' => 'hidden',
     '#title' => t('Make uploaded file public.'),
     '#value' => 1,
   );
