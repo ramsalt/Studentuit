@@ -1,0 +1,14 @@
+; $Id: scribdfield.info,v 1.1 2009/11/17 19:06:34 marcingy Exp $
+name = ScribdField
+description = Enables CCK FileField integration with Scribd.com.
+package = CCK
+dependencies[] = content
+dependencies[] = filefield
+core = 6.x
+
+; Information added by drupal.org packaging script on 2009-11-17
+version = "6.x-1.0"
+core = "6.x"
+project = "scribdfield"
+datestamp = "1258485461"
+

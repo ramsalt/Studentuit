@@ -1,0 +1,35 @@
+<?php
+// $Id: scribdfield.install,v 1.1 2009/11/17 19:06:34 marcingy Exp $
+
+/**
+ * Implementation of hook_install().
+ */
+function scribdfield_install() {
+  drupal_load('module', 'content');
+  content_notify('install', 'scribdfield');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function scribdfield_uninstall() {
+  drupal_load('module', 'content');
+  content_notify('uninstall', 'scribdfield');
+  variable_del('scribd_api_key');
+}
+
+/**
+ * Implementation of hook_enable().
+ */
+function scribdfield_enable() {
+  drupal_load('module', 'content');
+  content_notify('enable', 'scribdfield');
+}
+
+/**
+ * Implementation of hook_disable().
+ */
+function scribdfield_disable() {
+  drupal_load('module', 'content');
+  content_notify('disable', 'scribdfield');
+}
