@@ -34,10 +34,11 @@ function sosial_block_block($op = 'list', $delta = 0, $edit = array()) {
 }
 
 function _sb_facebook(){
-  $node = node_load(array('nid' => arg(1)));
+
   $space = spaces_get_space();
   if(strlen($space->group->field_fb_like_box[0]['value'])>2){
-    $html = $space->group->field_fb_like_box[0]['value']; 
+    $fbid = $space->group->field_fb_like_box[0]['value']; 
+    $html = '<fb:fan profile_id="'.$fbid.'" stream="" connections="6" width="300"></fb:fan><div style="font-size:8px; padding-left:10px"><a href="http://www.facebook.com/pages/'.$fbid.'">'.$space->group->title.'</a> on Facebook</div>';
     return $html;
   }else{
     return '';
