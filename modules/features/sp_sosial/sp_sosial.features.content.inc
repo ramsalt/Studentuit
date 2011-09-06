@@ -44,7 +44,7 @@ function sp_sosial_content_default_fields() {
     'allowed_values_php' => '',
     'widget' => array(
       'rows' => '5',
-      'size' => 60,
+      'size' => '60',
       'default_value' => array(
         '0' => array(
           'value' => '',
@@ -54,8 +54,8 @@ function sp_sosial_content_default_fields() {
       'default_value_php' => NULL,
       'label' => 'Facebook like boks',
       'weight' => '35',
-      'description' => '',
-      'type' => 'text_textarea',
+      'description' => 'Angi id til facebook pagen, og det vil komme en likeboks på gruppens forside',
+      'type' => 'text_textfield',
       'module' => 'text',
     ),
   );
