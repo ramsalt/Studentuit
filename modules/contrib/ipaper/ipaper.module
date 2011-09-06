@@ -1,0 +1,758 @@
+<?php
+// $Id: ipaper.module,v 1.1.2.43 2009/10/09 14:44:06 rares Exp $
+// $Name: DRUPAL-6--1-1 $
+/*
+ * @file
+ * iPaper module hooks and functions
+ * Extends iPaper content type, calls funtions in scribd.php to implement Scribd API
+ */
+
+//definition of constants and constant arrays
+
+function ipaper_private_options() {
+  return array('private' => t('Only this website'), 'public' => t('World - www.scribd.com'));
+}
+define ('DEFAULT_PRIVATE', 'private');
+
+function ipaper_license_options() {
+  return array(
+    'ns' => t('Unspecified - no licensing information shown'),
+    'by' => t('By attribution'),
+    'by-nc' => t('By attribution, non-commercial'),
+    'by-nc-nd' => t('By attribution, non-commercial, non-derivative'),
+    'by-nc-sa' => t('By attribution, non-commercial, share alike'),
+    'by-nd' => t('By attribution, non-derivative'),
+    'by-sa' => t('By attribution, share alike'),
+    'pd' => t('Public domain'),
+    'c' => t('Copyright - all rights reserved'),
+  );
+}
+define ('DEFAULT_LICENSE', 'by-nc');
+
+function ipaper_secure_options() {
+  return array(0 => t('No - Allow embedding'), 1 => t('Yes - Prevent embedding'));
+}
+define ('DEFAULT_SECURE', 0);
+
+define ('PLATFORM_CURL', 'CURL');
+define ('PLATFORM_FOPEN', 'FOPEN');
+define ('PLATFORM_EITHER', 'either');
+
+
+/**
+ * Implementation of hook_help().
+ */
+function ipaper_help($path, $arg) {
+  switch ($path) {
+    case 'admin/modules#description':
+      return t('Allows you to embed iPaper objects hosted at scribd.com.');
+
+    case 'node/add#ipaper':
+      return t('Add a paper.');
+
+  }
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function ipaper_perm() {
+  return array("create ipaper", "view ipapers", "edit own ipapers", "edit ipapers", "delete own ipapers", "delete ipapers", "embed ipapers", "embed own ipapers", "download ipapers", "edit ipaper parameters");
+}
+
+/**
+ * Implementation of hook_node_info().
+ */
+function ipaper_node_info() {
+  return array('ipaper' => array(
+    'name' => 'iPaper',
+    'description' => t('An iPaper is a document hosted on the scribd website.'),
+    'module' => 'ipaper'));
+}
+
+/**
+ * Implementation of hook_access().
+ */
+function ipaper_access($op, $node, $account) {
+ 
+  switch ($op) {
+    case 'create':
+      return user_access('create ipaper');
+
+    case 'view':
+      if ($node->uid == $account->uid && $account->uid != 0)
+        return TRUE;
+      if ($node->status == 0)
+        return user_access('administer nodes');
+      return user_access('view ipapers');
+
+    case 'update':
+      if ($account->uid == $node->uid && user_access("edit own ipapers")) {
+        return TRUE;
+      }
+      else {
+        return user_access("edit ipapers");
+      }
+
+    case 'delete':
+      if ($account->uid == $node->uid && user_access("delete own ipapers")) {
+        return TRUE;
+      }
+      else {
+        return user_access("delete ipapers");
+      }
+
+    default:
+      return FALSE;
+  }
+}
+
+/**
+ * Implementation of hook_form().
+ * This function is called to retrieve the form that is displayed when one attempts
+ * to create/edit an ipaper
+ */
+function ipaper_form(&$node) {
+
+  $type = node_get_types('type', 'ipaper');
+
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => $type->title_label,
+    '#default_value' => $node->title,
+    '#required' => TRUE,
+    '#weight' => -10,
+  );
+
+    $form['body'] = array(
+      '#type' => $type->has_body ? 'textarea': 'hidden',
+      '#title' => $type->body_label,
+      '#default_value' => $node->body,
+      '#description' => t('This text is displayed with your document.'),
+      '#weight' => -9,
+    );  
+
+    $form['private'] = array(
+      '#type' => variable_get('ipaper_choose_private', 1) ? 'select' : 'hidden',
+      '#title' => t('Visibility'),
+      '#options' => ipaper_private_options(),
+      '#disabled' => ($node->secure) ? TRUE : FALSE,
+      '#default_value' => ($node->private) ? $node->private : variable_get('ipaper_default_private', DEFAULT_PRIVATE),
+      '#description' => t('Public documents are also available on scribd.com.'),
+      '#weight' => -8,
+    );
+
+    $form['license'] = array(
+      '#type' => variable_get('ipaper_choose_license', 1) ? 'select' : 'hidden',
+      '#title' => t('License'),
+      '#options' => ipaper_license_options(),
+      '#default_value' => ($node->license) ? $node->license : variable_get('ipaper_default_license', DEFAULT_LICENSE),
+      '#description' => t('The license under which the document is published. For more information about licenses, see <a href="http://creativecommons.org/about/licenses/meet-the-licenses" target="_blank">http://creativecommons.org/</a>'),
+      '#weight' => -6,
+    );
+
+  //this cannot be changed once the document has been created
+    $form['secure'] = array(
+      '#type' => variable_get('ipaper_choose_secure', 1) ? 'select' : 'hidden',
+      '#title' => t('Secure iPaper'),
+      '#options' => ipaper_secure_options(),
+      '#disabled' => ($node->doc_id==NULL) ? FALSE : TRUE,
+      '#default_value' => ($node->secure!=NULL) ? $node->secure : variable_get('ipaper_default_secure', DEFAULT_SECURE),
+      '#description' => t('This option provides an additional layer of security for your upload, as it prevents users from embedding it into other websites. Note that this setting cannot be changed once the iPaper has been created.'),
+      '#weight' => -7,
+    );
+
+//these parameters are to be shown and edited only by administrators unless you want your users to create ipapers by entering these parameters
+
+if (user_access("edit ipaper parameters")) {
+
+  $form['doc_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('doc_id'),
+    '#default_value' => $node->doc_id,
+    '#description' => t('Scribd document ID. Required unless you are attaching a file.'),
+    '#required' => FALSE,
+    '#weight' => -5,
+  );
+
+  $form['secret_password'] = array(
+    '#type' => 'textfield',
+    '#title' => t('secret_password'),
+    '#default_value' => $node->secret_password,
+    '#description' => t('Scribd secret password'),
+    '#required' => FALSE,
+    '#weight' => -4,
+  );
+
+  $form['access_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('access_key'),
+    '#default_value' => $node->access_key,
+    '#description' => t('Scribd document access key. Required unless you are attaching a file.'),
+    '#required' => FALSE,
+    '#weight' => -3,
+  );
+
+  $form['fid'] = array(
+    '#type' => 'hidden',
+    //change type to textfield if you want to be able to edit this
+    '#title' => t('fid'),
+    '#default_value' => $node->fid,
+    '#description' => t('Drupal upload file ID. This is updated automatically by the module to track which file was last uploaded to scribd.'),
+    '#required' => FALSE,
+    '#weight' => -3,
+  );
+  
+} //if (user_access...
+
+  return $form;
+}
+
+/**
+ * Implementation of hook_validate().
+ */
+function ipaper_validate($node) {
+
+  //check to make sure that there are attachments
+  $files = $node->files;
+  if (!$files && !($node->doc_id && $node->access_key)) {
+    form_set_error('files[upload]', t('You must upload an attachment to create an iPaper.'));
+    return;
+  }
+
+  //also show a message if there is more than one attachment
+  //if (count($files)>1) {
+  //  drupal_set_message(t('iPapers are created from a single document. The iPaper that is displayed will always be generated from your most recent upload.'), 'notice');
+  //}
+
+}
+
+/**
+ * Database hooks when loading, inserting, updating or deleting an ipaper
+ */
+
+function ipaper_load($node) {
+  $paper = db_fetch_object(db_query('SELECT * FROM {ipaper} WHERE nid = %d', $node->nid));
+  return $paper;
+}
+
+function ipaper_insert($node) {
+  db_query("INSERT INTO {ipaper} (nid, fid, doc_id, secret_password, access_key, private, license, secure) VALUES (%d, %d, %d, '%s', '%s', '%s', '%s', %d)", $node->nid, $node->fid, $node->doc_id, $node->secret_password, $node->access_key, $node->private, $node->license, $node->secure);
+  $_REQUEST['destination'] = "ipaper_transfer/$node->nid";
+  //using drupal_goto would redirect before the node is saved
+}
+
+function ipaper_update($node) {
+  ipaper_dbupdate($node);
+  $_REQUEST['destination'] = "ipaper_transfer/$node->nid";
+}
+
+function ipaper_dbupdate($node) {
+  //used when a node is saved/submitted in Drupal as well as when the scribd.com API returns keys.
+  if (user_access('edit ipaper parameters')) {
+    _ipaper_dbupdate_params($node);
+  }
+  //$node->secure is included in case this property will become changeable in the future
+  return db_query("UPDATE {ipaper} SET private = '%s', license = '%s', secure = %d WHERE nid = %d", $node->private, $node->license, $node->secure, $node->nid);
+}
+
+function _ipaper_dbupdate_params($node) {
+  //used when when the scribd.com API returns keys.
+  return db_query("UPDATE {ipaper} SET fid = %d, doc_id = %d, secret_password = '%s', access_key = '%s' WHERE nid = %d", $node->fid, $node->doc_id, $node->secret_password, $node->access_key, $node->nid);
+}
+
+function _ipaper_dbupdate_full_text($node) {
+  //save full text for searching.
+  return db_query("UPDATE {ipaper} SET full_text = '%s' WHERE nid = %d", $node->full_text, $node->nid);
+}
+
+function ipaper_delete($node) {
+  db_query('DELETE FROM {ipaper} WHERE nid = %d', $node->nid);
+  if ($node->doc_id){
+    $scribd = ipaper_scribd_init();
+    $result = $scribd->delete($node->doc_id);
+    if (!$result) ipaper_report_error();
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function ipaper_menu() {
+  $items = array();
+
+    $items['admin/settings/ipaper'] = array(
+      'title' => t('IPaper module configuration'),
+      'description' => t('iPaper API keys and configuration.'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('ipaper_config_form'),
+      'access callback' => 'user_access',
+      'access arguments' => array('administer site configuration'),
+      'type' => MENU_NORMAL_ITEM,
+      'file' => 'ipaper.admin.inc',
+    );
+    $items['ipaper_transfer/%node'] = array(
+      'title' => t('Please wait...'),
+      'access callback' => 'node_access',
+      'access arguments' => array('create', 'ipaper'),
+      'page callback' => 'ipaper_transfer',
+      'page arguments' => array(1),
+      'type' => MENU_CALLBACK,
+      'file' => 'ipaper.upload.inc',
+    );
+    $items['ipaper_upload/%node'] = array(
+      'title' => t('Please wait...'),
+      'access callback' => 'node_access',
+      'access arguments' => array('create', 'ipaper'),
+      'page callback' => 'ipaper_upload',
+      'page arguments' => array(1),
+      'type' => MENU_CALLBACK,
+      'file' => 'ipaper.upload.inc',
+    );
+    $items['ipaper_download/%node'] = array(
+      'title' => t('Redirecting...'),
+      'access callback' => 'user_access',
+      'access arguments' => array('download ipapers'),
+      'page callback' => 'ipaper_download',
+      'page arguments' => array(1),
+      'type' => MENU_CALLBACK,
+      'file' => 'ipaper.upload.inc',
+    );
+
+  return $items;
+}
+
+
+/*
+ * Used by all functions that require Scribd API calls to return the $scribd class from the scribd.php library
+ */
+
+function ipaper_scribd_init() {
+
+  require_once drupal_get_path('module', 'ipaper') .'/ipaper.upload.inc';
+  require_once drupal_get_path('module', 'ipaper') .'/scribd.php';
+  
+  static $scribd_obj;
+  if ($scribd_obj) return $scribd_obj;
+
+  if (variable_get('scribd_api_key', '') == '') {
+    drupal_set_message(t('The iPaper module has not yet been configured. You need to set an API key obtained from scribd.com/platform/start before you can use the module'), 'error');
+  }
+
+  $scribd_api_key = variable_get('scribd_api_key', '');
+  $scribd_secret = variable_get('scribd_secret_key', '');
+
+  $scribd_obj = new Scribd($scribd_api_key, $scribd_secret);
+
+  //uncomment this if you want to store documents under the virtual accounts for each user
+  //note that files created for virtual users are only accessible through the API
+  //global $user;
+  //$scribd_obj->my_user_id = $user->name; // The user ID of one of your users
+
+  return $scribd_obj;
+}
+
+
+function ipaper_report_error() {
+  $scribd = ipaper_scribd_init();
+  drupal_set_message("Scribd error #". $scribd->geterror() .": ". $scribd->geterrormsg(), 'error');
+  watchdog('ipaper', "Scribd error #%number: %msg", array('%number' => $scribd->geterror(), '%msg' => $scribd->geterrormsg()), WATCHDOG_ERROR);
+
+}
+
+/**
+ * Implementation of hook_view().
+ */
+function ipaper_view($node, $teaser = FALSE, $page = FALSE) {
+
+  global $user;
+  $node = node_prepare($node, $teaser);
+  drupal_add_css(drupal_get_path('module', 'ipaper') .'/ipaper.css');
+
+  if ($teaser == FALSE) {
+
+    if (!$node->doc_id) {
+      $files = $node->files;
+      if ($files) {
+        $stat = node_access('create', 'ipaper') ? l(t("The previous attempt to convert this document to an iPaper failed. Click here to retry"), "ipaper_transfer/$node->nid"): "";
+      }
+      else{                           
+        $stat = t("Please upload a document to view it as an iPaper.");
+      }
+      $node->content['body']['#value'] .= $stat;
+      return $node;
+    }
+    
+    $type = node_get_types('type', 'ipaper');
+
+    $fs = array(
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#title' => $type->body_label,
+      '#value' => $node->content['body']['#value'],
+    );
+    if ($type->has_body && $node->content['body']['#value']!='') {
+      $node->content['body']['#value'] = theme('fieldset', $fs);
+    }
+
+    $node->content['viewer'] = array(
+      '#value' => theme('ipaper_viewer', $node),
+      '#weight' => 2,
+    );
+
+    if (user_access("download ipapers")) {
+      $node->content['download_link'] = array(
+        '#value' => theme('ipaper_download_link', $node),
+        '#weight' => 3,
+      );
+    }
+
+    if (variable_get('ipaper_show_scribd_link', 0)) {
+      $node->content['scribd_link'] = array(
+        '#value' => theme('ipaper_scribd_link', $node),
+        '#weight' => 4,
+      );
+    }
+
+    if (user_access("embed ipapers") || (user_access("embed own ipapers") && $node->uid == $user->uid)) {
+      $node->content['embed_code'] = array(
+        '#value' => theme('ipaper_embed_code', $node),
+        '#weight' => 5,
+      );
+    }
+      $node->content['license'] = array(
+        '#value' => theme('ipaper_license', $node),
+        '#weight' => 8,
+      );
+
+  }//if teaser=false
+  else{
+
+    $node->content['body']['#value'] = "<div class=ipaper-descr-teaser>" . $node->content['body']['#value'] ."</div>\n";
+
+    $node->content['thumbnail'] = array(
+      '#value' => theme('ipaper_thumbnail', $node),
+      '#weight' => -2,
+    );
+  }
+
+  return $node;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+
+function ipaper_theme() {
+  return array(
+    'ipaper_viewer' => array(
+      'arguments' => array('node'),
+    ),
+    'ipaper_thumbnail' => array(
+      'arguments' => array('node'),
+    ),
+    'ipaper_embed_code' => array(
+      'arguments' => array('node'),
+    ),
+    'ipaper_download_link' => array(
+      'arguments' => array('node'),
+    ),
+    'ipaper_scribd_link' => array(
+      'arguments' => array('node'),
+    ),
+    'ipaper_full_text' => array(
+      'arguments' => array('node'),
+    ),
+    'ipaper_license' => array(
+      'arguments' => array('node'),
+    ),
+  );
+}
+
+
+function theme_ipaper_viewer($node) {
+ 
+  $extraJS = variable_get('ipaper_extraJS', '');
+  if($node->secure)
+    $extraJS .= ipaper_generate_securesig($node);
+  $output = "
+  <script type=text/javascript src='http://www.scribd.com/javascripts/view.js'></script>
+  <div id='embedded_flash_$node->doc_id'>
+    <a href='http://www.scribd.com'>Embedded Scribd iPaper - Requires Javascript and Flash Player</a><br />
+  ". theme('ipaper_full_text', $node) ."
+  </div>
+  <script type=text/javascript>
+    var scribd_doc = scribd.Document.getDoc($node->doc_id, '$node->access_key');
+    scribd_doc.addParam( 'jsapi_version', 1 );
+    $extraJS
+    scribd_doc.write('embedded_flash_$node->doc_id');
+
+  </script>";
+
+  return $output ."\n";
+}
+
+function theme_ipaper_thumbnail($node) {
+
+  if(!$node->doc_id) return;
+
+  $size = variable_get('ipaper_thumbnail_size', 140);
+  if ($size == 0) return;
+ 
+  $path = _ipaper_get_thumb_path($node->doc_id);
+  
+  //if the thumbnail doesn't yet exist, fetch it, but only if a while has passed after the node was last saved. this ensures that we don't get a word doc or PDF icon
+  if (!file_exists($path) && time() - $node->changed > 120) {
+    $scribd = ipaper_scribd_init();
+    $stat = $scribd->getConversionStatus($node->doc_id);
+    if ($stat == "DONE")
+      _ipaper_save_thumb($node->doc_id, $scribd);
+  }
+  
+  if (file_exists($path)) {
+    $hover = t("Thumbnail of !title", array('!title' => $node->title));
+    $href = file_create_url($path);
+  }
+  else{
+    $href = base_path() . drupal_get_path('module', 'ipaper') .'/empty.jpg';
+    $hover = t("Thumbnail not yet available");
+  }
+
+  $output = '<img class="ipaper-thumbnail" src="'. $href .'" title="'. $hover .'" height="'. $size .'">';
+  if (node_access('view', $node)) {
+    $output = '<a href="'. url("node/$node->nid") .'" title="Read more...">'. $output ."</a>";
+  }
+  return $output ."\n";
+}
+
+function theme_ipaper_embed_code($node) {
+  if($node->secure)
+    return;
+  $output = '<object codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0" id="doc_!doc_id" name="doc_!doc_id" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" align="middle" height="500" width="100%"> <param name="movie" value="http://documents.scribd.com/ScribdViewer.swf?document_id=!doc_id&access_key=!access_key&page=&version=1&auto_size=true&viewMode="> <param name="quality" value="high"> <param name="play" value="true"> <param name="loop" value="true"> <param name="scale" value="showall"> <param name="wmode" value="opaque"> <param name="devicefont" value="false"> <param name="bgcolor" value="#ffffff"> <param name="menu" value="true"> <param name="allowFullScreen" value="true"> <param name="allowScriptAccess" value="always"> <param name="salign" value=""> <embed src = "http://documents.scribd.com/ScribdViewer.swf?document_id=!doc_id&access_key=!access_key&page=&version=1&auto_size=true&viewMode=" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" play="true" loop="true" scale="showall" wmode="opaque" devicefont="false" bgcolor="#ffffff" name="doc_!doc_id_object" menu="true" allowfullscreen="true" allowscriptaccess="always" salign="" type="application/x-shockwave-flash" align="middle"  height="500" width="100%"> </embed> </object>'; 
+  $keys = array(
+    '!doc_id' => $node->doc_id,
+    '!access_key' => $node->access_key,
+  );
+  $output = t($output, $keys);
+  $output = check_plain($output);
+  $output = '
+  <form action="" name="embedForm" id="embedForm">
+    <label for="embed_code">Embed</label>
+    <input id="embed_code_'.$node->doc_id.'" name="embed_code" type="text" value='."'$output'".' onClick="javascript:document.embedForm.embed_code.focus();document.embedForm.embed_code.select();" readonly />
+  </form>
+  ';
+  return $output;
+}
+
+function theme_ipaper_download_link($node) {
+  $format = variable_get('ipaper_download_format', 'pdf');
+  switch ($format) {
+    case 'pdf': $text = t("Download document as PDF"); break;
+    case 'txt': $text = t("Download document (plain text)"); break;
+    case 'original': $text = t("Download document");
+  }
+
+  $output = "<div class=\"ipaper-download-link ipaper-download-$format \">";
+  $output .= l($text, "ipaper_download/$node->nid");
+  $output .= '</div>';
+  return $output ."\n";
+}
+
+function theme_ipaper_scribd_link($node) {
+  if ($node->secure) return;
+  $output = '<div class="ipaper-scribd-link">';
+
+  $link = "http://www.scribd.com/doc/$node->doc_id";
+  if ($node->private == 'private') {
+    $link .= '?secret_password='. $node->secret_password;
+  }
+
+  $output .= '<a href="'. $link .'" target="_blank">Click here to view this document on www.scribd.com</a>';   
+  $output .= '</div>';
+  return $output ."\n";
+}
+
+function theme_ipaper_full_text($node) {
+
+  if (variable_get('ipaper_show_full_text', 1) || (variable_get('cron_semaphore', FALSE) && function_exists('search_cron'))) {
+    if (!$node->full_text)
+      $node->full_text = ipaper_get_full_text($node);
+    return $node->full_text ."\n";
+  //check_plain is not necessary because the equivalent was already done when the full text was saved.
+  }
+}
+
+function theme_ipaper_license($node) {
+  if ($node->license == 'ns' || $node->license == '' || $node->license == NULL)
+    return;
+  $output = '<div class="ipaper-license">';
+  switch ($node->license) {
+    case 'c':
+      $yr = date("Y", $node->created);
+      $output .= t("This document is &copy; !yr by !name - all rights reserved.", array('!yr'=>$yr, '!name'=>$node->name)); break;
+    case 'pd':
+      $output .= t('This document has been released into the public domain.'); break;
+    default:
+      $licenses = ipaper_license_options();
+      $title = $licenses[$node->license];
+      $img = "<img src=http://i.creativecommons.org/l/$node->license/3.0/88x31.png>";
+      $info = t("http://creativecommons.org/licenses/!lic/3.0/deed.en_US", array('!lic' => $node->license));
+      $output .= "<a href=$info target=blank>$img</a> <br />";
+      $output .= t("Published under a Creative Commons License"). " <a href=\"$info\" target=\"_blank\">$title</a> <br/>";
+  }
+ 
+  $output .= '</div>';
+  return $output ."\n";
+}
+
+
+/**
+ * This is called for nodes without full text by theme_ipaper_full_text and by the cron job
+ */
+
+function ipaper_get_full_text($node){
+
+  require_once drupal_get_path('module', 'ipaper') .'/ipaper.upload.inc';
+
+  $scribd = ipaper_scribd_init();
+  $stat = $scribd->getConversionStatus($node->doc_id);
+  if ($stat == "PROCESSING" || $stat == "DISPLAYABLE") 
+    return;
+
+  if ($stat == "DONE") {
+    //get full text for search index and display
+    $texturl = $scribd->getDownloadURL($node->doc_id, 'txt');
+    //for some reason, the URL comes back with leading and trailing spaces
+    $texturl = trim($texturl);
+    $full_text = _ipaper_request($texturl);
+    $full_text = htmlspecialchars($full_text);
+    // add <br /> instead of line breaks
+    $full_text = preg_replace('|(?<!<br />)\s*\n|', "<br />\n", $full_text);
+  }
+  
+  //if there's an error, or no text, it will still save something so that it doesn't end up here again
+  $node->full_text = $full_text ? $full_text : "<!-- no text -->";
+  _ipaper_dbupdate_full_text($node);
+  
+  if ($full_text){
+    if (function_exists("calais_nodeapi"))
+      calais_nodeapi($node, "insert");
+    return $full_text;
+  }
+
+}
+
+/**
+ * Implementation of hook_requirements().
+ */
+function ipaper_requirements($phase) {
+  $requirements = array();
+
+  if ($phase == 'runtime') {
+    // Raise warning if API keys have not been entered.
+    if (variable_get('scribd_api_key', '') == '') {
+      $requirements['ipaper'] = array(
+        'title' => t('iPaper configuration'),
+        'description' => t('The iPaper module has not been configured. Please configure it from the <a href="@url">iPaper settings page</a>.', array('@url' => url('admin/settings/ipaper'))),
+        'severity' => REQUIREMENT_ERROR,
+        'value' => t('Not configured'),
+      );
+    }
+  }
+
+  return $requirements;
+}
+
+function _ipaper_get_thumb_path($doc_id) {
+  return file_directory_path() .'/ipaper_thumbs/'. $doc_id .'.jpg';
+}
+
+
+/**
+ * Generate grantAccess instruction to include in Javascript API for documents that are secure
+ * Called by theme_ipaper_viewer()
+ */
+ 
+function ipaper_generate_securesig($node){
+  $APIkey = variable_get('scribd_api_key', '');
+  $secretkey = variable_get('scribd_secret_key', '');
+  global $user;
+  $grantuser = user_is_logged_in()? $user->name : 'guest';
+  $grantsid = session_id();
+  $securesig = "$secretkey"."document_id".$node->doc_id."session_id".$grantsid."user_identifier".$grantuser;
+  $securesig = md5($securesig);
+  $output = "
+    scribd_doc.addParam('use_ssl', true);
+    scribd_doc.grantAccess('$grantuser', '$grantsid', '$securesig'); 
+  ";
+  return $output;
+
+}
+
+/*
+ * Implementation of hook_nodeapi().
+ */
+
+function ipaper_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    case 'view':
+    
+      break;
+  }
+}
+
+/*
+ * Implementation of hook_cron().
+ */
+
+function ipaper_cron() {
+
+  if (!function_exists('search_cron') || !variable_get('ipaper_show_full_text', 1))
+    return;
+
+  //require_once drupal_get_path('module', 'ipaper') .'/ipaper.upload.inc';
+  $result = db_query("SELECT * FROM {ipaper} WHERE full_text is NULL");
+  while ($row = db_fetch_object($result)){
+    if ($row->doc_id){
+      $node = node_load($row->nid);
+      $scribd = ipaper_scribd_init();
+      //in case full text is saved, also change the update time so that the search module will index it
+      if (ipaper_get_full_text($node)){
+        $row = db_fetch_object($result);
+        db_query("UPDATE {search_dataset} SET reindex = %d WHERE type = 'node' AND sid = %d", time(), $row->nid);
+      }
+    }
+  }
+
+}
+
+/**
+ * Implementation of hook_filter().
+ */
+function ipaper_filter($op, $delta = 0, $format = -1, $text = "") {
+  switch ($op) {
+    case 'list':
+      return array(0 => t('iPaper embed filter'));
+    case 'description':
+      return t('Inserts iPaper embed code wherever tags of the following format are found: [scribd id={docid} key={access key}].');
+    case "process":
+      return ipaper_filter_process($text);
+    default:
+      return $text;
+  }
+}
+
+function ipaper_filter_process($text) {
+
+  $results = array();
+  $pattern = "/\[scribd id=([0-9]+) key=([-A-z0-9]+)\]/";
+  preg_match_all($pattern, $text, $results);
+  $output = $text;
+  foreach($results[0] as $rid=>$result){
+    $docobj->doc_id = $results[1][$rid];
+    $docobj->access_key = $results[2][$rid];
+    $JScode = theme("ipaper_viewer", $docobj);
+    $output = str_replace($results[0][$rid], $JScode, $output);
+  }
+  return $output;
+}

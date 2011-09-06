@@ -1,0 +1,544 @@
+# $Id: de.po,v 1.1.2.1 2009/04/05 04:42:30 rares Exp $
+#
+# German translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  scribd.php,v 1.1.2.9 2009/01/22 20:13:02 rares
+#  ipaper.module,v 1.1.2.37 2009/03/18 06:18:09 rares
+#  ipaper.install,v 1.1.2.10 2009/02/18 16:09:07 rares
+#  ipaper.info,v 1.1.2.5 2009/01/15 00:34:29 rares
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Drupal iPaper V6.x-1.0\n"
+"POT-Creation-Date: 2009-03-22 18:00+0100\n"
+"PO-Revision-Date: 2009-04-03 08:47+0100\n"
+"Last-Translator: Frank Tartler <frank.tartler@googlemail.com>\n"
+"Language-Team: Frank Tartler <frank.tartler@googlemail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: scribd.php:332
+#: ipaper.module:485;923;950;968;989;991;0
+msgid "ipaper"
+msgstr ""
+
+#: scribd.php:332
+msgid "Error parsing XML"
+msgstr "Fehler bei der XML-Verarbeitung"
+
+#: ipaper.module:13
+msgid "Only this website"
+msgstr "Nur diese Website"
+
+#: ipaper.module:13
+msgid "World - www.scribd.com"
+msgstr "Welt - www.scribd.com"
+
+#: ipaper.module:19
+#, fuzzy
+msgid "Unspecified - no licensing information shown"
+msgstr "Nicht angegeben - keine Lizenzinformation angezeigt"
+
+#: ipaper.module:20
+msgid "By attribution"
+msgstr "Namensnennung"
+
+#: ipaper.module:21
+msgid "By attribution, non-commercial"
+msgstr "Namensnennung, nicht-kommerziell"
+
+#: ipaper.module:22
+msgid "By attribution, non-commercial, non-derivative"
+msgstr "Namensnennung, nicht-kommerziell, keine Bearbeitung"
+
+#: ipaper.module:23
+msgid "By attribution, non-commercial, share alike"
+msgstr "Namensnennung, nicht-kommerziell, Weitergabe unter gleichen Bedingungen"
+
+#: ipaper.module:24
+msgid "By attribution, non-derivative"
+msgstr "Namensnennung, keine Bearbeitung"
+
+#: ipaper.module:25
+msgid "By attribution, share alike"
+msgstr "Namensnennung, Weitergabe unter gleichen Bedingungen"
+
+#: ipaper.module:26
+msgid "Public domain"
+msgstr "lizenzfrei"
+
+#: ipaper.module:27
+msgid "Copyright - all rights reserved"
+msgstr "Urheberrecht - Alle Rechte vorbehalten"
+
+#: ipaper.module:38
+msgid "Allows you to embed iPaper objects hosted at scribd.com."
+msgstr "Ermöglicht das unter Einbetten von iPaper-Objekten die auf scribd.com vorgehalten werden."
+
+#: ipaper.module:41
+msgid "Add a paper."
+msgstr "Ein Papier hinzufügen."
+
+#: ipaper.module:59
+msgid "An iPaper is a document hosted on the scribd website."
+msgstr "Ein iPaper ist ein Dokument, das auf der scribd-Website gehostet wird."
+
+#: ipaper.module:121
+msgid "This text is displayed with your document."
+msgstr "Dieser Teext wird mit dem Dokument angezeigt."
+
+#: ipaper.module:127
+msgid "Visibility"
+msgstr "Sichtbarkeit"
+
+#: ipaper.module:130
+msgid "Private documents are only available through this website. Public documents are also available on scribd.com and are indexed by search engines."
+msgstr "Private Dokumente sind nur über diese Website verfügbar. Öffentliche Dokumente sind auch unter scribd.com verfügbar und werden von Suchmaschinen indexiert."
+
+#: ipaper.module:136
+msgid "License"
+msgstr "Lizenz"
+
+#: ipaper.module:139
+msgid "The license under which the document is published. For more information about licenses, see <a href=\"http://creativecommons.org/about/licenses/meet-the-licenses\" target=\"_blank\">http://creativecommons.org/</a>"
+msgstr "Die Lizenz, unter der dieses Dokument veröffentlicht wird. Weitere Informationen zu Lizenzen sind unter <a href=\"http://creativecommons.org/about/licenses/meet-the-licenses\" target=\"_blank\">http://creativecommons.org/</a> zu finden."
+
+#: ipaper.module:149
+msgid "doc_id"
+msgstr ""
+
+#: ipaper.module:151
+msgid "Scribd document ID. Required unless you are attaching a file."
+msgstr "Sribd-Dokument-ID. Erforderlich wenn keine Datei angehängt wird."
+
+#: ipaper.module:158
+msgid "secret_password"
+msgstr ""
+
+#: ipaper.module:160
+msgid "Scribd secret password"
+msgstr "Geheimes Passwort von Scribd"
+
+#: ipaper.module:167
+msgid "access_key"
+msgstr ""
+
+#: ipaper.module:169
+msgid "Scribd document access key. Required unless you are attaching a file."
+msgstr "Sridb-Dokument-Zugriffs-Schlüssel. Erforderlich, wenn keine Datei angehängt wird."
+
+#: ipaper.module:177
+msgid "fid"
+msgstr ""
+
+#: ipaper.module:179
+msgid "Drupal upload file ID. This is updated automatically by the module to track which file was last uploaded to scribd."
+msgstr "Drupal-ID der hochgeladenen Datei. Diese wird automatisch durch das Modul aktualisiert um nachzuverfolgen, welche Datei zuletzt zu Scribd hochgeladen wurde."
+
+#: ipaper.module:197
+msgid "You must upload an attachment to create an iPaper."
+msgstr "Es muss ein Anhang hochgeladen werden, um ein iPaper zu erstellen."
+
+#: ipaper.module:203
+msgid "iPapers are created from a single document. The iPaper that is displayed will always be generated from your most recent upload."
+msgstr "iPaper werden von aus einem einzelnen Dokument erstellt. Das dargestellte iPaper wird immer vom neuesten Upload erzeugt."
+
+#: ipaper.module:262
+msgid "iPaper module configuration"
+msgstr "iPaper-Modul-Konfiguration"
+
+#: ipaper.module:263
+msgid "iPaper API keys and configuration."
+msgstr "iPaper-API-Schlüssel und -Konfiguration"
+
+#: ipaper.module:271;279
+msgid "Please wait..."
+msgstr "Bitte warten..."
+
+#: ipaper.module:287
+msgid "Redirecting..."
+msgstr "Weiterleitung..."
+
+#: ipaper.module:343
+msgid "Preparing document..."
+msgstr "Dokument wird vorbereitet..."
+
+#: ipaper.module:344
+msgid "This can take a while, depending on the size of your upload."
+msgstr "Dies kann je nach Größe des Uploads einen Moment dauern."
+
+#: ipaper.module:381
+msgid "A new version of your document has been uploaded. It may take a few minutes until the most recent version is displayed."
+msgstr "Eine neue Version des Dokuments wurde hochgeladen. Es kann ein paar Minuten dauern, bis die neueste Version angezeigt wird."
+
+#: ipaper.module:394
+msgid "Your document could not be successfully converted to an iPaper. See the message in the document display for more information"
+msgstr "Das Dokument konnte nicht erfolgreich in ein iPaper konvertiert werden. Die Nachricht im Dokument enthält weitere Informationen"
+
+#: ipaper.module:395
+msgid "Scribd failed conversion for document"
+msgstr "Sribc konnte das Dokument nicht konvertieren"
+
+#: ipaper.module:455
+msgid "Not an iPaper or the download link is not available"
+msgstr "Kein iPaper oder der Link zum Herunterladen ist nicht verfügbar"
+
+#: ipaper.module:463
+msgid "The iPaper module has not yet been configured. You need to set an API key obtained from scribd.com/platform/start before you can use the module"
+msgstr "Das iPaper-Modul wurde noch nicht konfiguriert. Es muss zuerst ein API-Schlüssel von scribd.com/platform/start erworben werden, bevor das Modul verwendet werden kann."
+
+#: ipaper.module:589
+msgid "The previous attempt to convert this document to an iPaper failed. Click here to retry."
+msgstr "Der vorherige Versuch dieses Dokument in ein iPaper zu konvertieren ist fehlgeschlagen. Hier klicken um es erneut zu versuchen."
+
+#: ipaper.module:592
+msgid "Please upload a document to view it as an iPaper."
+msgstr "Es muss ein Dokument hochgeladen werden, um es als iPaper anzuzeigen."
+
+#: ipaper.module:630
+msgid "Thumbnail of !title"
+msgstr "Miniaturansicht von !title"
+
+#: ipaper.module:635
+msgid "Thumbnail not yet available"
+msgstr "Miniaturansicht ist noch nicht verfügbar."
+
+#: ipaper.module:666
+msgid "Download document as PDF"
+msgstr "Dokument als PDF herunterladen"
+
+#: ipaper.module:667
+msgid "Download document (plain text)"
+msgstr "Dokument herunterladen (reiner Text)"
+
+#: ipaper.module:668
+msgid "Download document"
+msgstr "Dokument herunterladen"
+
+#: ipaper.module:706
+msgid "This document is &copy; !yr by !name - all rights reserved."
+msgstr "Dieses Dokument ist @copy; !yr von !name - alle Rechte vorbehalten."
+
+#: ipaper.module:708
+msgid "This document has been released into the public domain."
+msgstr "Dieses Dokujment wurde lizenzfrei herausgegeben."
+
+#: ipaper.module:713
+msgid "http://creativecommons.org/licenses/!lic/3.0/deed.en_US"
+msgstr ""
+
+#: ipaper.module:715
+msgid "Published under a Creative Commons License"
+msgstr "Unter einer Creative-Commons-Lizenz herausgegeben."
+
+#: ipaper.module:729
+msgid "Scribd API settings"
+msgstr "Scribd-API-Einstellungen"
+
+#: ipaper.module:730
+msgid "These values are necessary for you to be able to upload iPapers. Set up a scribd API account at <a href=\"http://www.scribd.com/platform/start\">http://www.scribd.com/platform/start</a>."
+msgstr "Diese Werte sind erforderlich, damit iPaper hochgeladen werden können. Es muss ein Scribd-API-Konto unter <a href=\"http://www.scribd.com/platform/start\">http://www.scribd.com/platform/start</a> eingerichtet werden."
+
+#: ipaper.module:734
+msgid "API key"
+msgstr "API-Schlüssel"
+
+#: ipaper.module:736
+msgid "The scribd.com API key for your website."
+msgstr "Der scribd.com-API-Schlüssel für diese Website."
+
+#: ipaper.module:740
+msgid "Secret key"
+msgstr "Geheimer Schlüssel"
+
+#: ipaper.module:742
+msgid "The scribd.com secret key for your website.  This is optional but provides added security. Enable \"Require API signature\" in your <a href=\"http://www.scribd.com/people/account\">Scribd account</a>to prevent third parties from using just the API key to post requests."
+msgstr "Der geheime Schlüssel von Scribd für diese Website. Dieser ist optional, stellt aber eine zusätzliche Sicherheit dar. Im <a href=\"http://www.scribd.com/people/account\">Scribd-Konto</a> muss „Require API Signature“ aktiviert sein, um Dritte daran zu hindern, einfach Anfragen mit dem API-Schlüssel zu erstellen."
+
+#: ipaper.module:747
+msgid "Ipaper cusomizations"
+msgstr "iPaper-Anpassungen"
+
+#: ipaper.module:748
+msgid "These settings affect the options available when iPapers are created/edited"
+msgstr "Diese Einstellungen beeinflussen die verfügbaren Optionen, wenn iPaper erstellt/bearbeitet werden"
+
+#: ipaper.module:752
+msgid "Default visibility setting"
+msgstr "Standard-Sichtbarkeitseinstellung"
+
+#: ipaper.module:755
+msgid "Private documents are only available through your website. Public documents are also available on scribd.com and are indexed by search engines."
+msgstr "Private Dokumente sind nur über diese Website verfügbar. Öffentliche Dokumente sind auch auf scribd.com verfügbar und werden durch Suchmaschinen indexiert."
+
+#: ipaper.module:759
+msgid "Show visibility option?"
+msgstr "Sichtbarkeitsoption anzeigen?"
+
+#: ipaper.module:761
+msgid "Allow users to choose whether their documents are private or public?"
+msgstr "Benutzern die Auswahl erlauben, ob ihre Dokumente privat oder öffentlich sind?"
+
+#: ipaper.module:765
+msgid "Licensing on scribd.com"
+msgstr "Lizenzierung auf scribd.com"
+
+#: ipaper.module:768
+msgid "The license under which documents are released. The license is shown on scribd.com."
+msgstr "Die Lizenz, unter der diese Dokumente veröffentlicht werden. Die Lizenz wird auf scribd.com angezeigt."
+
+#: ipaper.module:772
+msgid "Show license option?"
+msgstr "Lizenz-Option anzeigen?"
+
+#: ipaper.module:774
+msgid "Allow users to choose the license?"
+msgstr "Benutzern die Auswahl der Lizenz erlauben?"
+
+#: ipaper.module:779
+msgid "Node view"
+msgstr "Beitragsansicht"
+
+#: ipaper.module:780
+#, fuzzy
+msgid "Control the display of iPapers as full nodes."
+msgstr "Die Anzeige von iPapers als volle Beiträge steuern."
+
+#: ipaper.module:784
+msgid "Download format"
+msgstr "Download-Format"
+
+#: ipaper.module:787
+msgid "This is the format that users with the \"download ipapers\" permissions will download the documents in."
+msgstr "Dies ist das Format, in dem Benutzer mit der Berechtigung „iPaper herunterladen“ Dokumente herunterladen."
+
+#: ipaper.module:791
+msgid "Show link to Scribd document."
+msgstr "Link zum Scribd-Dokument anzeigen."
+
+#: ipaper.module:793
+msgid "If checked, a link to view the document on scribd.com will be displayed."
+msgstr "Wenn angekreuzt, wird ein Link zum Dokument auf scribd.com angezeigt."
+
+#: ipaper.module:797
+msgid "Include full text on pages."
+msgstr "Volltext auf Seiten einschließen."
+
+#: ipaper.module:799
+msgid "If checked, the plain text of the documents will be included on the pages in < noscript > tags (visible only to users that cannot see the iPaper viewer because Javascript is disabled). This is necessary if you want search engines to be able to index your content. However, it allows visitors to extract the text from the source of the page."
+msgstr "Wenn dies aktiviert wird, wird der reine Text der Dokumente auf den Seiten in < noscript > -Tags eingebunden (sichtbar nur für Benutzer, die das iPaper nicht sehen können, weil Javascript deaktiviert ist). Dies ist nötig, wenn Suchmaschinen den Inhalt indexieren können sollen. Es erlaubt Benutzer der Website aber auch, den Text aus der Seite zu extrahieren."
+
+#: ipaper.module:803
+msgid "Additional Javascript API code"
+msgstr "Zusätzlicher Javascript-API-Code"
+
+#: ipaper.module:805
+msgid "You can customize the appearance of iPaper objects by adding additional JavaScript commands - for example, you can define a custom width for the iPaper viewer, choose book or fullscreen mode as default, or set the zoom level. For command reference, see <a href=\"http://www.scribd.com/publisher/api?method_name=Javascript+API\">www.scribd.com/publisher/api</a>. var scribd_doc = ... and scribd_doc.write(...) are already included by this module."
+msgstr "Das Erscheinungsbild von iPaper-Objekten kann durch das Hinzufügen zusätzlicher Javascript-Kommandos angepasst werden - es kann zum Beispiel eine benutzerdefinierte Breite für iPaper-Anzeigeprogramme definiert werden, Buch- oder Vollbildschirmansicht als Standard ausgewählt werden, oder der Zoom-Level gesetzt werden. Eine Befehlsreferenz ist unter <a href=\"http://www.scribd.com/publisher/api?method_name=Javascript+API\">www.scribd.com/publisher/api</a> zu finden. var scribd_doc = ... und scribd_doc.write(...) sind in dieses Modul bereits integriert."
+
+#: ipaper.module:810
+msgid "Teaser view"
+msgstr "Anrisstext-Ansicht"
+
+#: ipaper.module:811
+msgid "Teaser view customizations."
+msgstr "Anpassungen der Anrisstext-Ansicht"
+
+#: ipaper.module:815
+msgid "Thumbnail size (height)"
+msgstr "Miniaturansicht-Größe (Höhe)"
+
+#: ipaper.module:818
+msgid "This setting affects whether the module downloads large or small thumbnails to display with your iPaper nodes. If you change this after you have created documents, you should rebuild your thumbnail cache. Note that for any values other than 100px and 220px, scaling is done in the user's browser. Support for enlarged thumbnails is experimental, so if thumbnails are not appearing, choose the 100px option, save this form and then rebuild the thumbnail cache."
+msgstr "Diese Einstellung beeinflusst ob das Modul beim Anzeigen von iPaper-Beiträgen große oder kleine Miniaturansichten anzeigt . Wenn dies nach dem Erstellen von Dokumenten geändert wird, sollte der Cache für Miniaturansichten neu aufgebaut werden. Zu beachten ist, dass bei Werten außer 100px und 220px eine Skalierung im Browser der Benutzer erfolgt. Die Unterstützung für vergrößerte Miniaturansichten ist experimentell; wenn also Miniaturansichten nicht erscheinen, sollte die Option 100px ausgewählt, dieses Formular gespeichert und der Cache für Miniaturansichten neu aufgebaut werden."
+
+#: ipaper.module:822
+msgid "Rebuild thumbnail cache"
+msgstr "Cache für Miniaturansichten neu aufbauen"
+
+#: ipaper.module:824
+msgid "Removes and re-downloads thumbnails stored in the ipaper_thumbs/ folder."
+msgstr "Enfernt Miniaturansichten aus dem Ordner ipaper_thmubs/folder und lädt sie neu herunter."
+
+#: ipaper.module:829
+msgid "Administrator settings"
+msgstr "Administrator-Einstellungen"
+
+#: ipaper.module:830
+msgid "Control the backend of the module."
+msgstr "Das Backend des Moduls steuern."
+
+#: ipaper.module:834
+msgid "Log all API requests to the event log"
+msgstr "Alle API-Aufrufe im Ereignisprotokoll protokollieren"
+
+#: ipaper.module:836
+msgid "Allows administrators to diagnose or track communication through the Scribd API."
+msgstr "Ermöglicht Administratoren, die Kommunikation durch die Scribd-API zu diagnostizieren oder zu verfolgen."
+
+#: ipaper.module:841
+msgid "Quickswitch"
+msgstr "Quickswitch"
+
+#: ipaper.module:842
+msgid "Quickswitch allows you to display the documents you have on your site as iPapers without manually uploading any files to scribd or creating iPaper nodes. <strong>This feature is no longer supported by Scribd and will be replaced by an implementation of the JavaScript API in future versions of the module</strong>"
+msgstr "Quickswitch ermöglicht die Anzeige der Dokumente auf der Website als iPaper, ohne irgendwelche Dateien manuell zu scribd hochzuladen oder iPaper-Beiträge zu erstellen. <strong>Diese Funktion wird nicht mehr von Scribd unterstützt und wird durch eine Implementierung der Javascript-API in einer späteren Version des Moduls ersetzt.</strong>"
+
+#: ipaper.module:846
+msgid "Include Quickswitch code on pages"
+msgstr "Quickswitch-Code auf Seiten integrieren"
+
+#: ipaper.module:848
+msgid "Add code to your site? Enter the code below"
+msgstr "Dieser Website Code hinzufügen? Code unten eingeben"
+
+#: ipaper.module:852
+msgid "Quickswitch code"
+msgstr "Quickswitch-Code"
+
+#: ipaper.module:854
+msgid "Enter the QuickSwitch code you got from scribd.com."
+msgstr "Von Scribd.com erhaltenen Quickswitch-Code eingeben"
+
+#: ipaper.module:871
+msgid "iPaper configuration"
+msgstr "iPaper-Konfiguration"
+
+#: ipaper.module:872
+msgid "The iPaper module has not been configured. Please configure it from the <a href=\"@url\">iPaper settings page</a>."
+msgstr "Das iPaper-Modul wurde noch nicht konfiguriert. Bitte auf der <a href=\"@url\">Seite mit den iPaper-Einstellungen</a> erledigen."
+
+#: ipaper.module:874
+msgid "Not configured"
+msgstr "Nicht konfiguriert"
+
+#: ipaper.module:967;988
+msgid "Request to Scribd.com failed. See the event log for more details."
+msgstr "Anforderung bei scribd.com fehlgeschlagen. Das Ereignisprotokoll enthält weitere Details."
+
+#: ipaper.module:485
+msgid "Scribd error #%number: %msg"
+msgstr "Scribd-Fehler #%number: %msg"
+
+#: ipaper.module:923
+msgid "Could not write thumbnail for doc_id %doc_id"
+msgstr "Miniaturansicht konnte nicht geschrieben werden für doc_id %doc_id"
+
+#: ipaper.module:950
+msgid ""
+"Action: %apimethod, Document ID: %doc_id \n"
+" URL: %link"
+msgstr ""
+"Aktion: %apimethod, Dokumenten-ID: %doc_id\n"
+" URL: %link"
+
+#: ipaper.module:968
+msgid "Request failed (CURL) - %err - %link"
+msgstr "Anforderung fehlgeschlagen (CURL) - %err - %link"
+
+#: ipaper.module:989
+msgid "Request failed (FOPEN) - %err - %link"
+msgstr "Anforderung fehlgeschlagen (FOPEN) - %err - %link"
+
+#: ipaper.module:991
+msgid "fsockopen might not be supported on your server. CURL must be installed or fsockopen enabled in order for the ipaper module to work"
+msgstr "Möglicherweise ist fsockopen auf dem Server nicht unterstützt. CURL muss installiert oder fsockopen aktiviert werden, damit das iPaper-Modul funktioniert."
+
+#: ipaper.module:50
+msgid "create ipaper"
+msgstr "iPaper erstellen"
+
+#: ipaper.module:50
+msgid "view ipapers"
+msgstr "iPaper anzeigen"
+
+#: ipaper.module:50
+msgid "edit own ipapers"
+msgstr "eigene iPaper bearbeiten"
+
+#: ipaper.module:50
+msgid "edit ipapers"
+msgstr "iPaper bearbeiten"
+
+#: ipaper.module:50
+msgid "delete own ipapers"
+msgstr "eigene iPaper löschen"
+
+#: ipaper.module:50
+msgid "delete ipapers"
+msgstr "iPaper löschen"
+
+#: ipaper.module:50
+msgid "embed ipapers"
+msgstr "iPaper einbetten"
+
+#: ipaper.module:50
+msgid "embed own ipapers"
+msgstr "eigene iPaper einbetten"
+
+#: ipaper.module:50
+msgid "download ipapers"
+msgstr "iPaper herunterladen"
+
+#: ipaper.module:50
+msgid "edit ipaper parameters"
+msgstr "iPapier-Parameter bearbeiten"
+
+#: ipaper.install:12
+msgid "The base table for nodes."
+msgstr "Die Basistabelle für Beiträge."
+
+#: ipaper.install:15
+msgid "Node identifier."
+msgstr "Beitrags-ID."
+
+#: ipaper.install:20
+msgid "File ID for uploaded docid."
+msgstr "Datei-ID für hochgeladene docid."
+
+#: ipaper.install:26
+msgid "Document ID returned by scribd."
+msgstr "Von scribd zurückgegebene Dokumenten-ID"
+
+#: ipaper.install:32
+msgid "Secret password for display of ipaper."
+msgstr "Geheimes Passwort zur Anzeige von iPaper"
+
+#: ipaper.install:38
+msgid "Access key to embed ipaper."
+msgstr "Zugriffsschlüssel zum Einbetten von iPaper."
+
+#: ipaper.install:44
+msgid "private or public hosting on scribd."
+msgstr "Privates oder Öffentliches Vorhalten auf scribd.com."
+
+#: ipaper.install:50
+msgid "Copyright setting."
+msgstr "Urheberrechts-Einstellung."
+
+#: ipaper.install:56
+msgid "Text of document for search index."
+msgstr "Text des Dokuments für den Suchindex"
+
+#: ipaper.install:62
+msgid "Path to thumbnail."
+msgstr "Pfad zur Miniaturansicht."
+
+#: ipaper.install:120
+msgid "The iPaper module was successfully uninstalled"
+msgstr "Das iPaper-Modul wurde erfolgreich deinstalliert"
+
+#: ipaper.info:0
+msgid "iPaper"
+msgstr "iPaper"
+
+#: ipaper.info:0
+msgid "Embed and publish iPaper documents through your Drupal site."
+msgstr "iPaper-Dokumente in der Drupal-Website einbetten und veröffentlichen"
+

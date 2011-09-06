@@ -1,0 +1,20 @@
+/* $Id: ipaper.css,v 1.1.2.4 2009/01/15 00:35:30 rares Exp $ */
+
+div.ipaper-descr-full{
+
+}
+
+div.ipaper-descr-teaser{
+  position: relative;
+  left: 5px;
+}
+
+img.ipaper-thumbnail{
+  float: left;
+  border-style: solid;
+  border-width: 1pt;
+}
+
+div.ipaper-license{
+  text-align: center;
+}
