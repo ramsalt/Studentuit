@@ -38,7 +38,7 @@ function _sb_facebook(){
   $space = spaces_get_space();
   if(strlen($space->group->field_fb_like_box[0]['value'])>2){
     $fbid = $space->group->field_fb_like_box[0]['value']; 
-    $html = '<fb:fan profile_id="'.$fbid.'" stream="" connections="6" width="300"></fb:fan><div style="font-size:8px; padding-left:10px"><a href="http://www.facebook.com/pages/'.$fbid.'">'.$space->group->title.'</a> on Facebook</div>';
+    $html = '<fb:fan profile_id="'.$fbid.'" stream="" connections="5" width="300"></fb:fan><div style="font-size:8px; padding-left:10px"><a href="http://www.facebook.com/pages/'.$fbid.'">'.$space->group->title.'</a> on Facebook</div>';
     return $html;
   }else{
     return '';
